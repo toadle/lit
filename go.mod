@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
+	github.com/b4b4r07/go-pipe v0.0.0-20191010045404-84b446f57366 // indirect
 	github.com/charmbracelet/bubbles v0.10.3 // indirect
 	github.com/charmbracelet/bubbletea v0.20.0 // indirect
 	github.com/charmbracelet/lipgloss v0.5.0 // indirect

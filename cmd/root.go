@@ -14,6 +14,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	pipe "github.com/b4b4r07/go-pipe"
 )
 
 var config = LauncherConfig{}
@@ -32,24 +33,22 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) { 
 		for _, sourceConfig := range config.SourceConfigList {
+			pipedCommands := strings.Split(sourceConfig.Command,"|")
+			execCommands := []*exec.Cmd{}
+			for _, pipeCommand := range pipedCommands {
+				commandComponents := strings.Split(strings.TrimSpace(pipeCommand)," ")
+				mainCommand := commandComponents[0]
+				args := commandComponents[1:]
+				
+				execCommands = append(execCommands, exec.Command(mainCommand, args...))
+			}
 			
-			commandComponents := strings.Split(sourceConfig.Command," ")
-			mainCommand := commandComponents[0]
-			args := commandComponents[1:]
-			
-			cmd := exec.Command(mainCommand, args...)
-			cmd.Stdin = strings.NewReader("and old falcon")
-	
-			var out bytes.Buffer
-			cmd.Stdout = &out
-	
-			err := cmd.Run()
-	
-			if err != nil {
+			var b bytes.Buffer
+			if err := pipe.Command(&b, execCommands...); err != nil {
 				fmt.Println(err)
 			}
 			
-			fmt.Print("%q\n", out.String())
+			fmt.Print(b.String())
 		}
 	},
 }
