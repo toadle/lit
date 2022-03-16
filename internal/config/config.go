@@ -1,4 +1,4 @@
-package cmd
+package config
 
 type SourceConfig struct {
     Command string `mapstructure:"command"`
