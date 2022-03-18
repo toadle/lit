@@ -5,19 +5,16 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 
 	"launcher/internal/config"
 	"launcher/internal/tui"
+	"launcher/internal/shell"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	pipe "github.com/b4b4r07/go-pipe"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/list"
 )
@@ -38,30 +35,17 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		for _, sourceConfig := range cliCfg.SourceConfigList {
-			pipedCommands := strings.Split(sourceConfig.Command,"|")
-			execCommands := []*exec.Cmd{}
-			for _, pipeCommand := range pipedCommands {
-				commandComponents := strings.Split(strings.TrimSpace(pipeCommand)," ")
-				mainCommand := commandComponents[0]
-				args := commandComponents[1:]
+			shellCmd := shell.NewCommand(sourceConfig.Command)
 
-				execCommands = append(execCommands, exec.Command(mainCommand, args...))
-			}
-
-			var b bytes.Buffer
-			if err := pipe.Command(&b, execCommands...); err != nil {
+			var lines []string
+			var err error
+			if err, lines = shellCmd.ResultLines(); err != nil {
 				fmt.Println(err)
 			}
 
 			items := []list.Item{}
-			lines := strings.Split(b.String(), "\n")
 			for _, line := range lines {
-				parts := strings.Split(line, ":")
-				if len(parts) == 2 {
-					data := parts[0]
-					label := parts[1]
-					items = append(items, tui.NewLauncherListItem(label, data))
-				}
+				items = append(items, tui.NewLauncherListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
 			}
 
 			list := list.New(items, list.NewDefaultDelegate(), 0, 0)

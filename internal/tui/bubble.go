@@ -1,6 +1,11 @@
 package tui
 
 import (
+	"strings"
+	"fmt"
+	"os"
+	"os/exec"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -9,15 +14,28 @@ import (
 )
 
 type LauncherListItem struct {
-	title, desc string
+	label, data, itemFormat, whenSelected string
 }
 
-func (i LauncherListItem) Title() string       { return i.title }
-func (i LauncherListItem) Description() string { return i.desc }
-func (i LauncherListItem) FilterValue() string { return i.title }
+func (i LauncherListItem) Title() string {
+	return i.label
+}
+func (i LauncherListItem) Description() string {
+	return i.data
+}
+func (i LauncherListItem) FilterValue() string {
+	return i.label
+}
 
-func NewLauncherListItem(title, desc string) *LauncherListItem {
-	return &LauncherListItem{title, desc}
+func NewLauncherListItem(itemData, itemFormat, whenSelected string) *LauncherListItem {
+	var label, data string
+	parts := strings.Split(itemData, ":")
+	if len(parts) == 2 {
+		data = parts[0]
+		label = parts[1]
+	}
+
+	return &LauncherListItem{label: label, data: data, itemFormat: itemFormat, whenSelected: whenSelected}
 }
 
 type Bubble struct {
@@ -46,7 +64,19 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter", " ":
 			i, ok := b.list.SelectedItem().(*LauncherListItem)
 			if ok {
-				//TODO: Do something meaningful on selection
+				cmdStr := strings.Replace(i.whenSelected, "{data}", i.data, 1)
+				commandComponents := strings.Split(strings.TrimSpace(cmdStr)," ")
+				mainCommand := commandComponents[0]
+				args := commandComponents[1:]
+
+				cmd := exec.Command(mainCommand, args...)
+				err := cmd.Run()
+
+				if err != nil {
+					fmt.Println(err)
+				} else {
+					os.Exit(0)
+				}
 			}
 		}
 	case tea.WindowSizeMsg:
