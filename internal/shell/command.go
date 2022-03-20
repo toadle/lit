@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 	pipe "github.com/b4b4r07/go-pipe"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Command struct {
@@ -24,15 +25,19 @@ func NewCommand(str string) *Command {
 	return &Command{execCommands: execCommands}
 }
 
-func (c Command) Run() (err error, buff bytes.Buffer) {
+func (c Command) Run() tea.Msg {
 	var b bytes.Buffer
-	return pipe.Command(&b, c.execCommands...), b
+
+	if err := pipe.Command(&b, c.execCommands...); err != nil {
+		return errMsg{err}
+	}
+
+	return ShellCommandResultMsg{Lines: strings.Split(b.String(), "\n")}
 }
 
-func (c Command) ResultLines() (e error, lines []string) {
-	var b bytes.Buffer
-	var err error
-
-	err, b = c.Run()
-	return err, strings.Split(b.String(), "\n")
+type ShellCommandResultMsg struct {
+	Lines []string
 }
+
+type errMsg struct{ err error }
+func (e errMsg) Error() string { return e.err.Error() }

@@ -11,6 +11,7 @@ import (
 
 	"launcher/internal/tui/style"
 	"launcher/internal/config"
+	"launcher/internal/shell"
 )
 
 type LauncherListItem struct {
@@ -34,25 +35,30 @@ func NewLauncherListItem(itemData, itemFormat, whenSelected string) *LauncherLis
 		data = parts[0]
 		label = parts[1]
 	}
-
 	return &LauncherListItem{label: label, data: data, itemFormat: itemFormat, whenSelected: whenSelected}
 }
 
 type Bubble struct {
 	config	*config.LauncherConfig
-	list	*list.Model
+
+	list	list.Model
 }
 
-func NewBubble(cliCfg *config.LauncherConfig, list *list.Model) *Bubble {
+func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 	b := &Bubble{
 		config:	cliCfg,
-		list:	list,
+		list: list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0),
 	}
 	return b
 }
 
 func (b *Bubble) Init() tea.Cmd {
-	return nil
+	var teaCmds []tea.Cmd
+	for _, sourceConfig := range b.config.SourceConfigList {
+		shellCmd := shell.NewCommand(sourceConfig.Command)
+		teaCmds = append(teaCmds, shellCmd.Run)
+	}
+	return tea.Batch(teaCmds...)
 }
 
 func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -82,12 +88,15 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		top, right, bottom, left := style.DefaultStyles().App.GetMargin()
 		b.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
+	case shell.ShellCommandResultMsg:
+		items := b.list.Items()
+		for _, line := range msg.Lines {
+			items = append(items, NewLauncherListItem(line, "", "")) //TODO support executing commands again
+		}
+		b.list.SetItems(items)
 	}
-
-	var cmd tea.Cmd
-	var list list.Model
-	list, cmd = b.list.Update(msg)
-	b.list = &list
+	list, cmd := b.list.Update(msg)
+	b.list = list
 	return b, cmd
 }
 

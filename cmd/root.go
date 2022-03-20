@@ -10,13 +10,11 @@ import (
 
 	"launcher/internal/config"
 	"launcher/internal/tui"
-	"launcher/internal/shell"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/bubbles/list"
 )
 
 var cliCfg = config.LauncherConfig{}
@@ -34,28 +32,12 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, sourceConfig := range cliCfg.SourceConfigList {
-			shellCmd := shell.NewCommand(sourceConfig.Command)
+		var bubble *tui.Bubble = tui.NewBubble(&cliCfg)
+		p := tea.NewProgram(bubble, tea.WithAltScreen())
 
-			var lines []string
-			var err error
-			if err, lines = shellCmd.ResultLines(); err != nil {
-				fmt.Println(err)
-			}
-
-			items := []list.Item{}
-			for _, line := range lines {
-				items = append(items, tui.NewLauncherListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
-			}
-
-			list := list.New(items, list.NewDefaultDelegate(), 0, 0)
-			var bubble *tui.Bubble = tui.NewBubble(&cliCfg, &list)
-			p := tea.NewProgram(bubble, tea.WithAltScreen())
-
-			if err := p.Start(); err != nil {
-				fmt.Println("Error running program:", err)
-				os.Exit(1)
-			}
+		if err := p.Start(); err != nil {
+			fmt.Println("Error running program:", err)
+			os.Exit(1)
 		}
 	},
 }
