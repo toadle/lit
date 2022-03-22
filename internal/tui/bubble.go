@@ -89,9 +89,10 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		top, right, bottom, left := style.DefaultStyles().App.GetMargin()
 		b.list.SetSize(msg.Width-left-right, msg.Height-top-bottom)
 	case shell.ShellCommandResultMsg:
+		sourceConfig := b.config.SourceConfigFor(msg.OriginalCommandStr)
 		items := b.list.Items()
 		for _, line := range msg.Lines {
-			items = append(items, NewLauncherListItem(line, "", "")) //TODO support executing commands again
+			items = append(items, NewLauncherListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
 		}
 		b.list.SetItems(items)
 	}

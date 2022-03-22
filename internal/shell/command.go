@@ -9,6 +9,7 @@ import (
 )
 
 type Command struct {
+	OriginalCommandStr string
 	execCommands []*exec.Cmd
 }
 
@@ -22,7 +23,7 @@ func NewCommand(str string) *Command {
 
 		execCommands = append(execCommands, exec.Command(mainCommand, args...))
 	}
-	return &Command{execCommands: execCommands}
+	return &Command{execCommands: execCommands, OriginalCommandStr: str}
 }
 
 func (c Command) Run() tea.Msg {
@@ -32,10 +33,11 @@ func (c Command) Run() tea.Msg {
 		return errMsg{err}
 	}
 
-	return ShellCommandResultMsg{Lines: strings.Split(b.String(), "\n")}
+	return ShellCommandResultMsg{Lines: strings.Split(b.String(), "\n"), OriginalCommandStr: c.OriginalCommandStr}
 }
 
 type ShellCommandResultMsg struct {
+	OriginalCommandStr string
 	Lines []string
 }
 
