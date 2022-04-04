@@ -38,7 +38,7 @@ func (i PinnedListItem) AsFormattedString() string {
 		sections    []string
 	)
 	if len(i.output) > 0 {
-		sections = append(sections, styles.Text.Render(i.output))
+		sections = append(sections, styles.Text.Render(i.cleanedOutput()))
 		sections = append(sections, " ")
 	}
 	if i.successful {
@@ -58,6 +58,9 @@ func (i PinnedListItem) FilterValue() string { return i.cmdStr }
 func (i *PinnedListItem) SetCurrentValue(str string) { i.currentInput = str }
 func (i *PinnedListItem) SetOutput(str string) { i.output = str }
 func (i *PinnedListItem) SetSuccessful(b bool) { i.successful = b }
+func (i PinnedListItem) cleanedOutput() string {
+	return strings.Replace(i.output, "\n", "", -1)
+}
 
 func NewPinnedListItem(cmdStr, itemFormat, whenSelected string) PinnedListItem {
 	return PinnedListItem{
