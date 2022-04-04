@@ -4,7 +4,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "launcher/cmd"
+import "lit/cmd"
 
 func main() {
 	cmd.Execute()

@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"launcher/internal/config"
-	"launcher/internal/tui"
+	"lit/internal/config"
+	"lit/internal/tui"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -63,12 +63,12 @@ func initConfig() {
 	}
 
 	viper.AddConfigPath(home)
-	viper.SetConfigName(".launcher")
+	viper.SetConfigName(".lit")
 	viper.SetConfigType("yml")
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Println("There is no %HOME%/.launcher.yml present. Please create one.")
+			fmt.Println("There is no %HOME%/.lit.yml present. Please create one.")
 		} else {
 			fmt.Println("Error reading config")
 			fmt.Println(err)

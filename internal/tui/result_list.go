@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"launcher/internal/tui/list"
+	"lit/internal/tui/list"
 )
 
 type ResultListItemDelegate struct{}

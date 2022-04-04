@@ -11,10 +11,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/samber/lo"
 
-	"launcher/internal/tui/list"
-	"launcher/internal/tui/style"
-	"launcher/internal/config"
-	"launcher/internal/shell"
+	"lit/internal/tui/list"
+	"lit/internal/tui/style"
+	"lit/internal/config"
+	"lit/internal/shell"
 )
 
 var (
@@ -106,13 +106,25 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.resultList.SetSize(msg.Width-left-right, 7)
 		b.pinnedList.SetSize(msg.Width-left-right, len(b.pinnedList.Items()))
 	case shell.ShellCommandResultMsg:
-		sourceConfig, ok := b.config.SourceConfigFor(msg.OriginalCommandStr)
+		sourceConfig, ok := b.config.SourceConfigFor(msg.CmdStr)
 		if ok {
-			items := b.resultList.Items()
-			for _, line := range msg.Lines {
-				items = append(items, NewResultListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
+			if sourceConfig.Pinned {
+				newPinnedList := lo.Map[list.Item, list.Item](b.pinnedList.Items(), func(i list.Item, _ int) list.Item {
+					p:= i.(PinnedListItem)
+					if p.cmdStr == msg.CmdStr {
+						p.SetOutput(msg.Output)
+						p.SetSuccessful(msg.Successful)
+					}
+					return p
+				})
+				b.pinnedList.SetItems(newPinnedList)
+			} else {
+				items := b.resultList.Items()
+				for _, line := range msg.Lines() {
+					items = append(items, NewResultListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
+				}
+				b.resultList.SetItems(items)
 			}
-			b.resultList.SetItems(items)
 		}
 	}
 
@@ -129,6 +141,14 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return p
 		})
 		b.pinnedList.SetItems(newPinnedList)
+
+		for _, sourceConfig := range b.config.SourceConfigList {
+			if strings.Contains(sourceConfig.Command, "{input}") {
+				shellCmd := shell.NewCommand(sourceConfig.Command)
+				shellCmd.SetInput(newQueryInput.Value())
+				teaCmds = append(teaCmds, shellCmd.Run)
+			}
+		}
 	}
 
 	// list, cmd := b.resultList.Update(msg)

@@ -6,40 +6,49 @@ import (
 	"strings"
 	pipe "github.com/b4b4r07/go-pipe"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/samber/lo"
 )
 
 type Command struct {
-	OriginalCommandStr string
-	execCommands []*exec.Cmd
+	cmdStr string
+	input string
 }
 
 func NewCommand(str string) *Command {
-	pipedCommands := strings.Split(str,"|")
-	execCommands := []*exec.Cmd{}
-	for _, pipeCommand := range pipedCommands {
-		commandComponents := strings.Split(strings.TrimSpace(pipeCommand)," ")
-		mainCommand := commandComponents[0]
-		args := commandComponents[1:]
-
-		execCommands = append(execCommands, exec.Command(mainCommand, args...))
-	}
-	return &Command{execCommands: execCommands, OriginalCommandStr: str}
+	return &Command{cmdStr: str}
 }
 
 func (c Command) Run() tea.Msg {
 	var b bytes.Buffer
 
-	if err := pipe.Command(&b, c.execCommands...); err != nil {
-		return errMsg{err}
-	}
+	err := pipe.Command(&b, c.execCommands()...)
 
-	return ShellCommandResultMsg{Lines: strings.Split(b.String(), "\n"), OriginalCommandStr: c.OriginalCommandStr}
+	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Successful: (err == nil)}
+}
+
+func (c *Command) SetInput(str string) {
+	c.input = str
+}
+
+func (c Command) execCommands() []*exec.Cmd {
+	str := strings.Replace(c.cmdStr, "{input}", c.input, 1)
+	pipedCommands := strings.Split(str,"|")
+
+	return lo.Map[string, *exec.Cmd](pipedCommands, func(pipeCommand string, _ int) *exec.Cmd {
+		commandComponents := strings.Split(strings.TrimSpace(pipeCommand)," ")
+		mainCommand := commandComponents[0]
+		args := commandComponents[1:]
+
+		return exec.Command(mainCommand, args...)
+	})
 }
 
 type ShellCommandResultMsg struct {
-	OriginalCommandStr string
-	Lines []string
+	CmdStr 		string
+	Output 		string
+	Successful	bool
 }
-
-type errMsg struct{ err error }
-func (e errMsg) Error() string { return e.err.Error() }
+func (s ShellCommandResultMsg) Lines() []string {
+	return strings.Split(s.Output, "\n")
+}

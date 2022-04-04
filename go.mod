@@ -1,4 +1,4 @@
-module launcher
+module lit
 
 go 1.18
 

@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"launcher/internal/tui/list"
+	"lit/internal/tui/list"
 )
 
 type PinnedListItemDelegate struct{}
@@ -25,21 +25,20 @@ func (d PinnedListItemDelegate) Render(w io.Writer, m list.Model, index int, lis
 }
 
 type PinnedListItem struct {
-	result			string
+	output			string
 	cmdStr			string
 	itemFormat		string
 	whenSelected	string
 	currentInput	string
 	successful		bool
-	errorMsg		string
 }
 
 func (i PinnedListItem) AsFormattedString() string {
 	var (
 		sections    []string
 	)
-	if len(i.result) > 0 {
-		sections = append(sections, styles.Text.Render(i.result))
+	if len(i.output) > 0 {
+		sections = append(sections, styles.Text.Render(i.output))
 		sections = append(sections, " ")
 	}
 	if i.successful {
@@ -57,6 +56,8 @@ func (i PinnedListItem) AsFormattedString() string {
 }
 func (i PinnedListItem) FilterValue() string { return i.cmdStr }
 func (i *PinnedListItem) SetCurrentValue(str string) { i.currentInput = str }
+func (i *PinnedListItem) SetOutput(str string) { i.output = str }
+func (i *PinnedListItem) SetSuccessful(b bool) { i.successful = b }
 
 func NewPinnedListItem(cmdStr, itemFormat, whenSelected string) PinnedListItem {
 	return PinnedListItem{
