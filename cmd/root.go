@@ -33,7 +33,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		var bubble *tui.Bubble = tui.NewBubble(&cliCfg)
-		p := tea.NewProgram(bubble, tea.WithAltScreen())
+		p := tea.NewProgram(bubble)
 
 		if err := p.Start(); err != nil {
 			fmt.Println("Error running program:", err)
