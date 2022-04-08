@@ -2,9 +2,6 @@ package tui
 
 import (
 	"strings"
-	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,12 +13,8 @@ import (
 	"lit/internal/config"
 	"lit/internal/shell"
 )
-
-var (
-	styles = style.DefaultStyles()
-)
-
 type Bubble struct {
+	styles		style.Styles
 	config		*config.LauncherConfig
 	width		int
 	height		int
@@ -33,22 +26,12 @@ type Bubble struct {
 
 func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 	b := &Bubble{
+		styles: 	style.DefaultStyles(),
 		config:		cliCfg,
-		resultList:	list.New([]list.Item{}, ResultListItemDelegate{}, 0, 0),
+		resultList:	list.New([]list.Item{}, 0),
 		queryInput:	textinput.New(),
-		pinnedList:	list.New([]list.Item{}, PinnedListItemDelegate{}, 0, 0),
+		pinnedList:	list.New([]list.Item{}, 0),
 	}
-	b.resultList.SetShowHelp(false)
-	b.resultList.SetShowStatusBar(false)
-	b.resultList.SetShowTitle(false)
-	b.resultList.SetShowFilter(false)
-
-	b.pinnedList.SetShowHelp(false)
-	b.pinnedList.SetShowStatusBar(false)
-	b.pinnedList.SetShowTitle(false)
-	b.pinnedList.SetShowPagination(false)
-	b.pinnedList.SetShowFilter(false)
-
 	b.queryInput.Placeholder = "Your Query"
 	b.queryInput.Focus()
 
@@ -63,9 +46,11 @@ func (b *Bubble) Init() tea.Cmd {
 		teaCmds = append(teaCmds, shellCmd.Run)
 	}
 
+	b.resultList.Select(0)
+
 	var pinnedItems []list.Item
 	for _, sourceConfig := range b.config.PinnedSourceConfigList() {
-		pinnedItems = append(pinnedItems, NewPinnedListItem(sourceConfig.Command, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
+		pinnedItems = append(pinnedItems, list.NewPinnedListItem(sourceConfig.Command, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
 	}
 	b.pinnedList.SetItems(pinnedItems)
 
@@ -81,37 +66,37 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c":
 			return b, tea.Quit
 		case "enter", " ":
-			i, ok := b.resultList.SelectedItem().(*ResultListItem)
-			if ok {
-				cmdStr := strings.Replace(i.whenSelected, "{data}", i.data, 1)
-				commandComponents := strings.Split(strings.TrimSpace(cmdStr)," ")
-				mainCommand := commandComponents[0]
-				args := commandComponents[1:]
-
-				cmd := exec.Command(mainCommand, args...)
-				err := cmd.Run()
-
-				if err != nil {
-					fmt.Println(err)
-				} else {
-					os.Exit(0)
-				}
-			}
+// 			i, ok := b.resultList.SelectedItem().(*ResultListItem)
+// 			if ok {
+// 				cmdStr := strings.Replace(i.whenSelected, "{data}", i.data, 1)
+// 				commandComponents := strings.Split(strings.TrimSpace(cmdStr)," ")
+// 				mainCommand := commandComponents[0]
+// 				args := commandComponents[1:]
+//
+// 				cmd := exec.Command(mainCommand, args...)
+// 				err := cmd.Run()
+//
+// 				if err != nil {
+// 					fmt.Println(err)
+// 				} else {
+// 					os.Exit(0)
+// 				}
+// 			}
 		}
 	case tea.WindowSizeMsg:
 		b.width = msg.Width
 		b.height = msg.Height
-		_, right, _, left := styles.App.GetMargin()
+		// _, right, _, left := styles.App.GetMargin()
 
-		b.resultList.SetSize(msg.Width-left-right, 7)
-		b.pinnedList.SetSize(msg.Width-left-right, len(b.pinnedList.Items()))
+		b.resultList.SetHeight(7)
+		b.pinnedList.SetHeight(len(b.pinnedList.Items()))
 	case shell.ShellCommandResultMsg:
 		sourceConfig, ok := b.config.SourceConfigFor(msg.CmdStr)
 		if ok {
 			if sourceConfig.Pinned {
 				newPinnedList := lo.Map[list.Item, list.Item](b.pinnedList.Items(), func(i list.Item, _ int) list.Item {
-					p:= i.(PinnedListItem)
-					if p.cmdStr == msg.CmdStr {
+					p:= i.(list.PinnedListItem)
+					if p.CmdStr() == msg.CmdStr {
 						p.SetOutput(msg.Output)
 						p.SetSuccessful(msg.Successful)
 					}
@@ -121,7 +106,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				items := b.resultList.Items()
 				for _, line := range msg.Lines() {
-					items = append(items, NewResultListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
+					items = append(items, list.NewResultListItem(line, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
 				}
 				b.resultList.SetItems(items)
 			}
@@ -136,7 +121,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if queryChanged {
 		newPinnedList := lo.Map[list.Item, list.Item](b.pinnedList.Items(), func(i list.Item, _ int) list.Item {
-			p:= i.(PinnedListItem)
+			p:= i.(list.PinnedListItem)
 			p.SetCurrentValue(newQueryInput.Value())
 			return p
 		})
@@ -151,10 +136,11 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// list, cmd := b.resultList.Update(msg)
-	// b.resultList = list
+	list, cmd := b.resultList.Update(msg)
+	b.resultList = list
+	teaCmds = append(teaCmds, cmd)
 
-	list, cmd := b.pinnedList.Update(msg)
+	list, cmd = b.pinnedList.Update(msg)
 	b.pinnedList = list
 	teaCmds = append(teaCmds, cmd)
 
@@ -166,11 +152,11 @@ func (b *Bubble) View() string {
 		sections    []string
 	)
 
-	queryStyle := styles.Query.Width(b.width)
+	queryStyle := b.styles.Query.Width(b.width)
 
 	sections = append(sections, b.pinnedList.View())
 	sections = append(sections, queryStyle.Render(b.queryInput.View()))
 	sections = append(sections, b.resultList.View())
 
-	return styles.App.Render(lipgloss.JoinVertical(lipgloss.Left, sections...))
+	return lipgloss.JoinVertical(lipgloss.Left, sections...)
 }
