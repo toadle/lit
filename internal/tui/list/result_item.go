@@ -39,7 +39,15 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		mutedTextStyle = d.styles.MutedText
 	}
 
-	sections = append(sections, textStyle.Render(i.label))
+	if (m.filterState == Filtered) {
+		underlineTextStyle := textStyle.Copy().Underline(true)
+		matchedRunes := m.MatchesForItem(index)
+		label := lipgloss.StyleRunes(i.label, matchedRunes, underlineTextStyle, textStyle)
+		sections = append(sections, textStyle.Render(label))
+	} else {
+		sections = append(sections, textStyle.Render(i.label))
+	}
+
 	sections = append(sections, " ")
 	sections = append(sections, mutedTextStyle.Render(i.data))
 

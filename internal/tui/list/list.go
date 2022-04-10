@@ -6,9 +6,24 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/samber/lo"
 
 	"lit/internal/tui/style"
 )
+
+type FilterState int
+
+const (
+	Unfiltered	FilterState = iota
+	Filtered
+)
+
+func (f FilterState) String() string {
+	return [...]string{
+		"unfiltered",
+		"filtered",
+	}[f]
+}
 
 
 type Model struct {
@@ -19,6 +34,10 @@ type Model struct {
 	cursor				int
 	windowBeginIndex	int
 	windowEndIndex		int
+
+	filterState			FilterState
+	filterValue			string
+	filteredItems		[]FilteredItem
 }
 
 func New(items []Item, height int) Model {
@@ -29,6 +48,7 @@ func New(items []Item, height int) Model {
 		windowBeginIndex: 	0,
 		windowEndIndex: 	0,
 		items:				items,
+		filterState:		Unfiltered,
 	}
 	return m
 }
@@ -82,6 +102,40 @@ func (m *Model) CursorDown() {
 	}
 }
 
+func (m *Model) SetFilterValue(term string) {
+	m.filterValue = term
+}
+
+func (m *Model) UnfilterItems() {
+	m.filteredItems = []FilteredItem{}
+	m.filterState = Unfiltered
+}
+
+func (m *Model) FilterItems() {
+	if m.filterValue == "" {
+		return
+	}
+	m.filterState = Filtered
+
+	targets := lo.Map[Item, string](m.items, func(i Item, _ int) string {
+		return i.FilterValue()
+	})
+
+	rankedItems := FuzzyFilter(m.filterValue, targets)
+
+	m.filteredItems = lo.Map[Rank, FilteredItem](rankedItems, func(r Rank, _ int) FilteredItem {
+		return FilteredItem{
+			item:    m.items[r.Index],
+			matches: r.MatchedIndexes,
+		}
+	})
+	m.filterState = Filtered
+
+	m.cursor = 0
+	m.windowBeginIndex = 0
+	m.windowEndIndex = m.height
+}
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	var teaCmds []tea.Cmd
 
@@ -107,7 +161,19 @@ func (m Model) View() string {
 }
 
 func (m Model) visibleItems() []Item {
+	if m.filterState != Unfiltered {
+		return lo.Map[FilteredItem, Item](m.filteredItems, func(i FilteredItem, _ int) Item {
+			return i.item
+		})
+	}
 	return m.items
+}
+
+func (m Model) MatchesForItem(index int) []int {
+	if m.filteredItems == nil || index >= len(m.filteredItems) {
+		return nil
+	}
+	return m.filteredItems[index].matches
 }
 
 func (m Model) populatedView() string {
@@ -120,8 +186,13 @@ func (m Model) populatedView() string {
 		return m.styles.MutedText.Render("No items found.")
 	}
 
+	endIndex := m.windowEndIndex
+	if m.windowEndIndex > len(items) {
+		endIndex = len(items)
+	}
+
 	if len(items) > 0 {
-		for i, item := range items[m.windowBeginIndex:m.windowEndIndex] {
+		for i, item := range items[m.windowBeginIndex:endIndex] {
 			item.Render(&b, m, m.windowBeginIndex + i, item)
 			fmt.Fprint(&b, "\n")
 		}

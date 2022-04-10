@@ -46,8 +46,6 @@ func (b *Bubble) Init() tea.Cmd {
 		teaCmds = append(teaCmds, shellCmd.Run)
 	}
 
-	b.resultList.Select(0)
-
 	var pinnedItems []list.Item
 	for _, sourceConfig := range b.config.PinnedSourceConfigList() {
 		pinnedItems = append(pinnedItems, list.NewPinnedListItem(sourceConfig.Command, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
@@ -133,6 +131,13 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				shellCmd.SetInput(newQueryInput.Value())
 				teaCmds = append(teaCmds, shellCmd.Run)
 			}
+		}
+
+		if (len(newQueryInput.Value()) == 0) {
+			b.resultList.UnfilterItems()
+		} else {
+			b.resultList.SetFilterValue(newQueryInput.Value())
+			b.resultList.FilterItems()
 		}
 	}
 

@@ -10,3 +10,8 @@ type Item interface {
 	Render(w io.Writer, m Model, index int, item Item)
 	Update(msg tea.Msg, m *Model) tea.Cmd
 }
+
+type FilteredItem struct {
+	item    Item  // item matched
+	matches []int // rune indices of matched items
+}
