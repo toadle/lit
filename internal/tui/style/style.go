@@ -14,6 +14,7 @@ type Styles struct {
   Query						lipgloss.Style
   ResultListItem			lipgloss.Style
   PinnedListItem			lipgloss.Style
+  NoResultItem				lipgloss.Style
   MutedText					lipgloss.Style
   SelectedMutedText			lipgloss.Style
   MutedTextUnterlined		lipgloss.Style
@@ -31,6 +32,8 @@ func DefaultStyles() (s Styles) {
 						MarginLeft(2)
 
 	s.ResultListItem = s.PinnedListItem.Copy()
+	s.NoResultItem = s.PinnedListItem.Copy().
+						Foreground(lipgloss.Color("#555555"))
 
 	s.MutedText = lipgloss.NewStyle().
 					Foreground(lipgloss.Color("#555555"))
@@ -54,7 +57,6 @@ func DefaultStyles() (s Styles) {
 					Foreground(lipgloss.Color("#FF4C94"))
 
 	s.Query = lipgloss.NewStyle().
-					Background(lipgloss.Color("#1C1C1C")).
 					Margin(1, 0)
 
   return s

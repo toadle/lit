@@ -3,12 +3,12 @@ package tui
 import (
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/samber/lo"
 
 	"lit/internal/tui/list"
+	"lit/internal/tui/textinput"
 	"lit/internal/tui/style"
 	"lit/internal/config"
 	"lit/internal/shell"
@@ -32,6 +32,9 @@ func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 		queryInput:	textinput.New(),
 		pinnedList:	list.New([]list.Item{}, 0),
 	}
+
+	b.resultList.SetNoResultText("Nothing found.")
+
 	b.queryInput.Placeholder = "Your Query"
 	b.queryInput.Focus()
 
@@ -135,9 +138,15 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if (len(newQueryInput.Value()) == 0) {
 			b.resultList.UnfilterItems()
+			b.resultList.Unselect()
+			b.queryInput.SetAutoComplete("")
 		} else {
 			b.resultList.SetFilterValue(newQueryInput.Value())
 			b.resultList.FilterItems()
+			if len(b.resultList.VisibleItems()) > 0 {
+				b.resultList.Select(0)
+				b.queryInput.SetAutoComplete(b.resultList.VisibleItems()[0].FilterValue())
+			}
 		}
 	}
 

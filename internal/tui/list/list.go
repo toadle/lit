@@ -38,6 +38,8 @@ type Model struct {
 	filterState			FilterState
 	filterValue			string
 	filteredItems		[]FilteredItem
+
+	noResultText		string
 }
 
 func New(items []Item, height int) Model {
@@ -49,8 +51,13 @@ func New(items []Item, height int) Model {
 		windowEndIndex: 	0,
 		items:				items,
 		filterState:		Unfiltered,
+		noResultText:		"No items found.",
 	}
 	return m
+}
+
+func (m *Model) SetNoResultText(str string) {
+	m.noResultText = str
 }
 
 func (m *Model) Select(index int) {
@@ -130,10 +137,6 @@ func (m *Model) FilterItems() {
 		}
 	})
 	m.filterState = Filtered
-
-	m.cursor = 0
-	m.windowBeginIndex = 0
-	m.windowEndIndex = m.height
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
@@ -160,7 +163,7 @@ func (m Model) View() string {
 	return lipgloss.JoinVertical(lipgloss.Left, sections...)
 }
 
-func (m Model) visibleItems() []Item {
+func (m Model) VisibleItems() []Item {
 	if m.filterState != Unfiltered {
 		return lo.Map[FilteredItem, Item](m.filteredItems, func(i FilteredItem, _ int) Item {
 			return i.item
@@ -177,13 +180,13 @@ func (m Model) MatchesForItem(index int) []int {
 }
 
 func (m Model) populatedView() string {
-	items := m.visibleItems()
+	items := m.VisibleItems()
 
 	var b strings.Builder
 
 	// Empty states
 	if len(items) == 0 {
-		return m.styles.MutedText.Render("No items found.")
+		return m.styles.NoResultItem.Render(m.noResultText)
 	}
 
 	endIndex := m.windowEndIndex
