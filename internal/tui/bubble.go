@@ -1,7 +1,9 @@
 package tui
 
 import (
+	// "fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -13,15 +15,20 @@ import (
 	"lit/internal/config"
 	"lit/internal/shell"
 )
-type Bubble struct {
-	styles		style.Styles
-	config		*config.LauncherConfig
-	width		int
-	height		int
 
-	resultList	list.Model
-	queryInput	textinput.Model
-	pinnedList	list.Model
+type queryChangedMsg int
+
+type Bubble struct {
+	styles			style.Styles
+	config			*config.LauncherConfig
+	width			int
+	height			int
+
+	resultList		list.Model
+	queryInput		textinput.Model
+	pinnedList		list.Model
+
+	queryInputTag	int
 }
 
 func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
@@ -63,10 +70,10 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c":
+		switch msg.Type {
+		case tea.KeyCtrlC:
 			return b, tea.Quit
-		case "enter", " ":
+		case tea.KeyEnter:
 // 			i, ok := b.resultList.SelectedItem().(*ResultListItem)
 // 			if ok {
 // 				cmdStr := strings.Replace(i.whenSelected, "{data}", i.data, 1)
@@ -83,6 +90,11 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // 					os.Exit(0)
 // 				}
 // 			}
+		case tea.KeyRunes, tea.KeyBackspace:
+			b.queryInputTag++
+			teaCmds = append(teaCmds, tea.Tick(time.Millisecond * 100, func(_ time.Time) tea.Msg {
+				return queryChangedMsg(b.queryInputTag)
+			}))
 		}
 	case tea.WindowSizeMsg:
 		b.width = msg.Width
@@ -112,53 +124,59 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.resultList.SetItems(items)
 			}
 		}
-	}
-
-	// Update the filter text input component
-	newQueryInput, cmd := b.queryInput.Update(msg)
-	queryChanged := b.queryInput.Value() != newQueryInput.Value()
-	b.queryInput = newQueryInput
-	teaCmds = append(teaCmds, cmd)
-
-	if queryChanged {
-		newPinnedList := lo.Map[list.Item, list.Item](b.pinnedList.Items(), func(i list.Item, _ int) list.Item {
-			p:= i.(list.PinnedListItem)
-			p.SetCurrentValue(newQueryInput.Value())
-			return p
-		})
-		b.pinnedList.SetItems(newPinnedList)
-
-		for _, sourceConfig := range b.config.SourceConfigList {
-			if strings.Contains(sourceConfig.Command, "{input}") {
-				shellCmd := shell.NewCommand(sourceConfig.Command)
-				shellCmd.SetInput(newQueryInput.Value())
-				teaCmds = append(teaCmds, shellCmd.Run)
-			}
-		}
-
-		if (len(newQueryInput.Value()) == 0) {
-			b.resultList.UnfilterItems()
-			b.resultList.Unselect()
-			b.queryInput.SetAutoComplete("")
-		} else {
-			b.resultList.SetFilterValue(newQueryInput.Value())
-			b.resultList.FilterItems()
-			if len(b.resultList.VisibleItems()) > 0 {
-				b.resultList.Select(0)
-				b.queryInput.SetAutoComplete(b.resultList.VisibleItems()[0].FilterValue())
-			}
+	case queryChangedMsg:
+		if int(msg) == b.queryInputTag {
+			teaCmds = append(teaCmds, b.handleQueryChanged()...)
 		}
 	}
 
-	list, cmd := b.resultList.Update(msg)
-	b.resultList = list
+	var cmd tea.Cmd
+
+	b.queryInput, cmd = b.queryInput.Update(msg)
 	teaCmds = append(teaCmds, cmd)
 
-	list, cmd = b.pinnedList.Update(msg)
-	b.pinnedList = list
+	b.resultList, cmd = b.resultList.Update(msg)
+	teaCmds = append(teaCmds, cmd)
+
+	b.pinnedList, cmd = b.pinnedList.Update(msg)
 	teaCmds = append(teaCmds, cmd)
 
 	return b, tea.Batch(teaCmds...)
+}
+
+func (b *Bubble) handleQueryChanged() []tea.Cmd {
+	var teaCmds []tea.Cmd
+
+	currentInputValue := b.queryInput.Value()
+
+	newPinnedList := lo.Map[list.Item, list.Item](b.pinnedList.Items(), func(i list.Item, _ int) list.Item {
+		p:= i.(list.PinnedListItem)
+		p.SetCurrentValue(currentInputValue)
+		return p
+	})
+	b.pinnedList.SetItems(newPinnedList)
+
+	for _, sourceConfig := range b.config.SourceConfigList {
+		if strings.Contains(sourceConfig.Command, "{input}") {
+			shellCmd := shell.NewCommand(sourceConfig.Command)
+			shellCmd.SetInput(currentInputValue)
+			teaCmds = append(teaCmds, shellCmd.Run)
+		}
+	}
+
+	if (len(currentInputValue) == 0) {
+		b.resultList.UnfilterItems()
+		b.resultList.Unselect()
+		b.queryInput.SetAutoComplete("")
+	} else {
+		b.resultList.SetFilterValue(currentInputValue)
+		b.resultList.FilterItems()
+		if len(b.resultList.VisibleItems()) > 0 {
+			b.resultList.Select(0)
+			b.queryInput.SetAutoComplete(b.resultList.VisibleItems()[0].FilterValue())
+		}
+	}
+	return teaCmds
 }
 
 func (b *Bubble) View() string {
