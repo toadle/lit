@@ -31,21 +31,25 @@ func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	}
 	var sections []string
 
-	if len(i.output) > 0 {
-		sections = append(sections, i.styles.Text.Render(i.cleanedOutput()))
-		sections = append(sections, " ")
-	}
-	if i.successful {
-		sections = append(sections, i.styles.SuccessText.Render("✔"))
+	var textStyle, mutedTextStyle lipgloss.Style
+	if index == m.Index() {
+		textStyle = d.styles.SelectedText
+		mutedTextStyle = d.styles.SelectedMutedText
 	} else {
-		sections = append(sections, i.styles.ErrorText.Render("✘"))
+		textStyle = d.styles.Text
+		mutedTextStyle = d.styles.MutedText
 	}
-	sections = append(sections, " ")
+	mutedUnderlineTextStyle := mutedTextStyle.Copy().Underline(true)
+
 	cmdStr := i.cmdStr
 	if len(i.currentInput) > 0 {
-		cmdStr = strings.Replace(i.cmdStr, "{input}", i.styles.MutedTextUnterlined.Render(i.currentInput), 1)
+		cmdStr = strings.Replace(i.cmdStr, "{input}", mutedUnderlineTextStyle.Render(i.currentInput), 1)
 	}
-	sections = append(sections, i.styles.MutedText.Render(cmdStr))
+	sections = append(sections, mutedTextStyle.Render(cmdStr))
+	sections = append(sections, " ")
+	if len(i.output) > 0 {
+		sections = append(sections, textStyle.Render(i.cleanedOutput()))
+	}
 
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }

@@ -18,6 +18,14 @@ import (
 
 type queryChangedMsg int
 
+type CursorFocus int
+
+const (
+	PinnedList	CursorFocus = iota
+	QueryInput
+	ResultList
+)
+
 type Bubble struct {
 	styles			style.Styles
 	config			*config.LauncherConfig
@@ -29,6 +37,7 @@ type Bubble struct {
 	pinnedList		list.Model
 
 	queryInputTag	int
+	focus			CursorFocus
 }
 
 func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
@@ -38,12 +47,12 @@ func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 		resultList:	list.New([]list.Item{}, 0),
 		queryInput:	textinput.New(),
 		pinnedList:	list.New([]list.Item{}, 0),
+		focus: 		QueryInput,
 	}
 
 	b.resultList.SetNoResultText("Nothing found.")
-
 	b.queryInput.Placeholder = "Your Query"
-	b.queryInput.Focus()
+	b.focusQueryInput()
 
 	return b
 }
@@ -90,6 +99,24 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // 					os.Exit(0)
 // 				}
 // 			}
+		case tea.KeyUp:
+			switch b.focus {
+				case QueryInput:
+					b.focusPinnedList()
+				case ResultList:
+					if b.resultList.Index() == 0 {
+						b.focusQueryInput()
+					}
+			}
+		case tea.KeyDown:
+			switch b.focus {
+				case PinnedList:
+					if b.pinnedList.Index() == b.pinnedList.Height() {
+						b.focusQueryInput()
+					}
+				case QueryInput:
+					b.focusResultList()
+			}
 		case tea.KeyRunes, tea.KeyBackspace:
 			b.queryInputTag++
 			teaCmds = append(teaCmds, tea.Tick(time.Millisecond * 100, func(_ time.Time) tea.Msg {
@@ -132,14 +159,20 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	var cmd tea.Cmd
 
-	b.queryInput, cmd = b.queryInput.Update(msg)
-	teaCmds = append(teaCmds, cmd)
+	if b.focus == QueryInput {
+		b.queryInput, cmd = b.queryInput.Update(msg)
+		teaCmds = append(teaCmds, cmd)
+	}
 
-	b.resultList, cmd = b.resultList.Update(msg)
-	teaCmds = append(teaCmds, cmd)
+	if b.focus == ResultList {
+		b.resultList, cmd = b.resultList.Update(msg)
+		teaCmds = append(teaCmds, cmd)
+	}
 
-	b.pinnedList, cmd = b.pinnedList.Update(msg)
-	teaCmds = append(teaCmds, cmd)
+	if b.focus == PinnedList {
+		b.pinnedList, cmd = b.pinnedList.Update(msg)
+		teaCmds = append(teaCmds, cmd)
+	}
 
 	return b, tea.Batch(teaCmds...)
 }
@@ -191,4 +224,26 @@ func (b *Bubble) View() string {
 	sections = append(sections, b.resultList.View())
 
 	return lipgloss.JoinVertical(lipgloss.Left, sections...)
+}
+
+func (b *Bubble) focusPinnedList() {
+	b.focus = PinnedList
+	b.resultList.Unselect()
+	b.queryInput.Blur()
+	b.queryInput.PromptStyle = b.styles.Text
+	b.pinnedList.Select(b.pinnedList.Height())
+}
+func (b *Bubble) focusQueryInput() {
+	b.focus = QueryInput
+	b.queryInput.Focus()
+	b.queryInput.PromptStyle = b.styles.QueryPromptFocused
+	b.pinnedList.Unselect()
+	b.resultList.Unselect()
+}
+func (b *Bubble) focusResultList() {
+	b.focus = ResultList
+	b.pinnedList.Unselect()
+	b.resultList.Select(0)
+	b.queryInput.Blur()
+	b.queryInput.PromptStyle = b.styles.Text
 }

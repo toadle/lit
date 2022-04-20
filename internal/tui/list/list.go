@@ -85,6 +85,9 @@ func (m *Model) SetHeight(h int) {
 		m.windowEndIndex = h
 	}
 }
+func (m *Model) Height() int {
+	return m.height
+}
 
 func (m *Model) CursorUp() {
 	if m.cursor > -1 {

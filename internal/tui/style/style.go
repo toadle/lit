@@ -12,6 +12,7 @@ type Styles struct {
   App						lipgloss.Style
   List						lipgloss.Style
   Query						lipgloss.Style
+  QueryPromptFocused		lipgloss.Style
   ResultListItem			lipgloss.Style
   PinnedListItem			lipgloss.Style
   NoResultItem				lipgloss.Style
@@ -58,6 +59,10 @@ func DefaultStyles() (s Styles) {
 
 	s.Query = lipgloss.NewStyle().
 					Margin(1, 0)
+
+	s.QueryPromptFocused = s.Text.Copy().
+					Foreground(lipgloss.Color("#FF00FF")).
+					Bold(true)
 
   return s
 }
