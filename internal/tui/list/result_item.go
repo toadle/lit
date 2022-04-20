@@ -1,7 +1,6 @@
 package list
 
 import (
-	"strings"
 	"fmt"
 	"io"
 
@@ -9,18 +8,34 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"lit/internal/tui/style"
+	"lit/internal/util"
 )
 
 type ResultListItem struct {
 	styles			style.Styles
-	label			string
-	data			string
-	itemFormat		string
+	resultData		util.ParsedResult
 	whenSelected 	string
 }
 
+func (i ResultListItem) label() string {
+	label, exists := i.resultData.Data["label"]
+	if exists {
+		return label
+	} else {
+		return ""
+	}
+}
+func (i ResultListItem) data() string {
+	data, exists := i.resultData.Data["data"]
+	if exists {
+		return data
+	} else {
+		return ""
+	}
+}
+
 func (i ResultListItem) FilterValue() string {
-	return i.label
+	return i.label()
 }
 func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd	{ return nil }
 func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
@@ -42,30 +57,23 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	if (m.filterState == Filtered) {
 		underlineTextStyle := textStyle.Copy().Underline(true)
 		matchedRunes := m.MatchesForItem(index)
-		label := lipgloss.StyleRunes(i.label, matchedRunes, underlineTextStyle, textStyle)
+		label := lipgloss.StyleRunes(i.label(), matchedRunes, underlineTextStyle, textStyle)
 		sections = append(sections, textStyle.Render(label))
 	} else {
-		sections = append(sections, textStyle.Render(i.label))
+		sections = append(sections, textStyle.Render(i.label()))
 	}
 
 	sections = append(sections, " ")
-	sections = append(sections, mutedTextStyle.Render(i.data))
+	sections = append(sections, mutedTextStyle.Render(i.data()))
 
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
 
 func NewResultListItem(itemData, itemFormat, whenSelected string) ResultListItem {
-	var label, data string
-	parts := strings.Split(itemData, ":")
-	if len(parts) == 2 {
-		data = parts[0]
-		label = parts[1]
-	}
+	parsedResult := util.ParseResult(itemData, itemFormat)
 	return ResultListItem{
 		styles: style.DefaultStyles(),
-		label: label,
-		data: data,
-		itemFormat: itemFormat,
+		resultData: parsedResult,
 		whenSelected: whenSelected,
 	}
 }
