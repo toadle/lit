@@ -12,7 +12,7 @@ import (
 
 type Command struct {
 	cmdStr string
-	input string
+	params map[string]string
 }
 
 func NewCommand(str string) *Command {
@@ -27,12 +27,12 @@ func (c Command) Run() tea.Msg {
 	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Successful: (err == nil)}
 }
 
-func (c *Command) SetInput(str string) {
-	c.input = str
+func (c *Command) SetParams(params map[string]string) {
+	c.params = params
 }
 
 func (c Command) execCommands() []*exec.Cmd {
-	str := strings.Replace(c.cmdStr, "{input}", c.input, 1)
+	str := SetCommandParameters(c.cmdStr, c.params)
 	pipedCommands := strings.Split(str,"|")
 
 	return lo.Map[string, *exec.Cmd](pipedCommands, func(pipeCommand string, _ int) *exec.Cmd {

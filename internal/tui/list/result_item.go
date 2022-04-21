@@ -8,17 +8,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"lit/internal/tui/style"
-	"lit/internal/util"
+	"lit/internal/shell"
 )
 
 type ResultListItem struct {
 	styles			style.Styles
-	resultData		util.ParsedResult
+	resultData		shell.CommandResult
 	whenSelected 	string
 }
 
 func (i ResultListItem) label() string {
-	label, exists := i.resultData.Data["label"]
+	label, exists := i.resultData.Params["label"]
 	if exists {
 		return label
 	} else {
@@ -26,7 +26,7 @@ func (i ResultListItem) label() string {
 	}
 }
 func (i ResultListItem) data() string {
-	data, exists := i.resultData.Data["data"]
+	data, exists := i.resultData.Params["data"]
 	if exists {
 		return data
 	} else {
@@ -70,7 +70,7 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 }
 
 func NewResultListItem(itemData, itemFormat, whenSelected string) ResultListItem {
-	parsedResult := util.ParseResult(itemData, itemFormat)
+	parsedResult := shell.ParseCommandResult(itemData, itemFormat)
 	return ResultListItem{
 		styles: style.DefaultStyles(),
 		resultData: parsedResult,

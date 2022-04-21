@@ -1,15 +1,15 @@
-package util
+package shell
 
 import (
 	"regexp"
 )
 
-type ParsedResult struct {
+type CommandResult struct {
 	Unparsed string
-	Data map[string]string
+	Params map[string]string
 }
 
-func ParseResult(resultStr string, itemFormat string) ParsedResult {
+func ParseCommandResult(resultStr string, itemFormat string) CommandResult {
 	re := regexp.MustCompile(itemFormat)
 	groupNames := re.SubexpNames()
 
@@ -24,5 +24,5 @@ func ParseResult(resultStr string, itemFormat string) ParsedResult {
 		}
 	}
 
-	return ParsedResult{Unparsed: resultStr, Data: resultData}
+	return CommandResult{Unparsed: resultStr, Params: resultData}
 }

@@ -192,7 +192,9 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 	for _, sourceConfig := range b.config.SourceConfigList {
 		if strings.Contains(sourceConfig.Command, "{input}") {
 			shellCmd := shell.NewCommand(sourceConfig.Command)
-			shellCmd.SetInput(currentInputValue)
+			shellCmd.SetParams(map[string]string {
+				"input": currentInputValue,
+			})
 			teaCmds = append(teaCmds, shellCmd.Run)
 		}
 	}
