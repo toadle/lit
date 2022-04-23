@@ -16,8 +16,8 @@ func TestParserCorrectFormat(t *testing.T) {
 	assert.Equal(len(parsedResult.Params), 2, "has correct number of result-data")
 
 	dataKeys := lo.Keys[string,string](parsedResult.Params)
-	assert.Equal(dataKeys[0], "data", "has extracted the correct keys")
-	assert.Equal(dataKeys[1], "label", "has extracted the correct keys")
+	assert.Equal(lo.Contains[string](dataKeys, "data"), true, "has extracted the 'data' key")
+	assert.Equal(lo.Contains[string](dataKeys, "label"), true, "has extracted the 'label' key")
 
 	assert.Equal(parsedResult.Params["data"], "/Applications/Keynote.app", "has extracted the correct values")
 	assert.Equal(parsedResult.Params["label"], "Keynote", "has extracted the correct values")
