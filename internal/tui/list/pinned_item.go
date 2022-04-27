@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/samber/lo"
 
 	"lit/internal/tui/style"
 )
@@ -39,11 +40,16 @@ func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		textStyle = d.styles.Text
 		mutedTextStyle = d.styles.MutedText
 	}
-	mutedUnderlineTextStyle := mutedTextStyle.Copy().Underline(true)
 
 	cmdStr := i.cmdStr
-	if len(i.currentInput) > 0 {
-		cmdStr = strings.Replace(i.cmdStr, "{input}", mutedUnderlineTextStyle.Render(i.currentInput), 1)
+	currentInput := i.currentInput
+	lengthOfInput := len(currentInput)
+	if lengthOfInput > 0 {
+		if idx := strings.Index(cmdStr, "{input}"); idx > -1 {
+			cmdStr = strings.Replace(cmdStr, "{input}", currentInput, 1)
+			underlineTextStyle := mutedTextStyle.Copy().Underline(true)
+			cmdStr = lipgloss.StyleRunes(cmdStr, lo.RangeFrom(idx, idx + lengthOfInput), underlineTextStyle, mutedTextStyle)
+		}
 	}
 	sections = append(sections, mutedTextStyle.Render(cmdStr))
 	sections = append(sections, " ")
