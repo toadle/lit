@@ -1,5 +1,5 @@
 sources:
-  - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep ^/Applications | sed s/...kMDItemDisplayName.=./:/"
+  - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep --invert-match Utilities | grep --invert-match Library | sed s/...kMDItemDisplayName.=./:/"
     itemFormat: "(?P<data>.+):(?P<label>.+)"
     whenSelected: "open {data}"
     pinned: false
@@ -13,6 +13,7 @@ sources:
     whenSelected: |
       echo "{data}" | pbcopy
     pinned: true
+    label: trans {input}
   - command: echo {input} | sed s/,/./g | bc
     itemFormat: "{data}"
     whenSelected: echo "{data}" | pbcopy

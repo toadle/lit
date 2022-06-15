@@ -19,6 +19,7 @@ type PinnedListItem struct {
 	itemFormat		string
 	whenSelected	string
 	currentInput	string
+	label			string
 	successful		bool
 }
 
@@ -41,17 +42,20 @@ func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		mutedTextStyle = d.styles.MutedText
 	}
 
-	cmdStr := i.cmdStr
+	displayStr := i.cmdStr
+	if len(i.label) > 0 {
+		displayStr = i.label
+	}
 	currentInput := i.currentInput
 	lengthOfInput := len(currentInput)
 	if lengthOfInput > 0 {
-		if idx := strings.Index(cmdStr, "{input}"); idx > -1 {
-			cmdStr = strings.Replace(cmdStr, "{input}", currentInput, 1)
+		if idx := strings.Index(displayStr, "{input}"); idx > -1 {
+			displayStr = strings.Replace(displayStr, "{input}", currentInput, 1)
 			underlineTextStyle := mutedTextStyle.Copy().Underline(true)
-			cmdStr = lipgloss.StyleRunes(cmdStr, lo.RangeFrom(idx, idx + lengthOfInput), underlineTextStyle, mutedTextStyle)
+			displayStr = lipgloss.StyleRunes(displayStr, lo.RangeFrom(idx, idx + lengthOfInput), underlineTextStyle, mutedTextStyle)
 		}
 	}
-	sections = append(sections, mutedTextStyle.Render(cmdStr))
+	sections = append(sections, mutedTextStyle.Render(displayStr))
 	sections = append(sections, " ")
 	if len(i.output) > 0 {
 		sections = append(sections, textStyle.Render(i.cleanedOutput()))
@@ -68,12 +72,13 @@ func (i PinnedListItem) cleanedOutput() string {
 	return strings.Replace(i.output, "\n", "", -1)
 }
 
-func NewPinnedListItem(cmdStr, itemFormat, whenSelected string) PinnedListItem {
+func NewPinnedListItem(cmdStr string, itemFormat string, label string, whenSelected string) PinnedListItem {
 	return PinnedListItem{
 		styles: style.DefaultStyles(),
 		cmdStr: cmdStr,
 		itemFormat: itemFormat,
 		whenSelected: whenSelected,
+		label: label,
 		successful: false,
 	}
 }

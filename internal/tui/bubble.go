@@ -67,7 +67,7 @@ func (b *Bubble) Init() tea.Cmd {
 
 	var pinnedItems []list.Item
 	for _, sourceConfig := range b.config.PinnedSourceConfigList() {
-		pinnedItems = append(pinnedItems, list.NewPinnedListItem(sourceConfig.Command, sourceConfig.ItemFormat, sourceConfig.WhenSelected))
+		pinnedItems = append(pinnedItems, list.NewPinnedListItem(sourceConfig.Command, sourceConfig.ItemFormat, sourceConfig.Label, sourceConfig.WhenSelected))
 	}
 	b.pinnedList.SetItems(pinnedItems)
 

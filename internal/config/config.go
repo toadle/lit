@@ -9,6 +9,7 @@ type SourceConfig struct {
 	ItemFormat string `mapstructure:"itemFormat"`
 	WhenSelected string `mapstructure:"whenSelected"`
 	Pinned bool `mapstructure:"pinned"`
+	Label string `mapstructure:"label"`
 }
 
 type LauncherConfig struct {
