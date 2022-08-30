@@ -6,11 +6,11 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/samber/lo"
 
 	"lit/internal/tui/list"
-	"lit/internal/tui/textinput"
 	"lit/internal/tui/style"
 	"lit/internal/config"
 	"lit/internal/shell"
@@ -52,6 +52,7 @@ func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 
 	b.resultList.SetNoResultText("Nothing found.")
 	b.queryInput.Placeholder = "Your Query"
+	b.queryInput.ShowCompletions = true
 	b.focusQueryInput()
 
 	return b
@@ -202,17 +203,30 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 	if (len(currentInputValue) == 0) {
 		b.resultList.UnfilterItems()
 		b.resultList.Unselect()
-		b.queryInput.SetAutoComplete("")
 	} else {
 		b.resultList.SetFilterValue(currentInputValue)
 		b.resultList.FilterItems()
 		if len(b.resultList.VisibleItems()) > 0 {
 			b.resultList.Select(0)
-			b.queryInput.SetAutoComplete(b.resultList.VisibleItems()[0].FilterValue())
 		}
 	}
+
+	teaCmds = append(teaCmds, b.generateCompletions)
 	return teaCmds
 }
+
+func (b *Bubble) generateCompletions() tea.Msg {
+	if (len(b.queryInput.Value()) == 0) {
+		return b.queryInput.NewCompletionMsg("")
+	} else {
+		if len(b.resultList.VisibleItems()) > 0 {
+			autocompleteValue := b.resultList.VisibleItems()[0].FilterValue()
+			return b.queryInput.NewCompletionMsg(autocompleteValue)
+		}
+	}
+	return nil
+}
+
 
 func (b *Bubble) View() string {
 	var (
