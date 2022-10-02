@@ -7,14 +7,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"lit/internal/tui/style"
+	"lit/internal/config"
 	"lit/internal/shell"
+	"lit/internal/tui/style"
 )
 
 type ResultListItem struct {
-	styles			style.Styles
-	resultData		shell.CommandResult
-	whenSelected 	string
+	styles       style.Styles
+	resultData   shell.CommandResult
+	sourceConfig config.SourceConfig
 }
 
 func (i ResultListItem) label() string {
@@ -37,7 +38,7 @@ func (i ResultListItem) data() string {
 func (i ResultListItem) FilterValue() string {
 	return i.label()
 }
-func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd	{ return nil }
+func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
 func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	i, ok := listItem.(ResultListItem)
 	if !ok {
@@ -54,7 +55,7 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		mutedTextStyle = d.styles.MutedText
 	}
 
-	if (m.filterState == Filtered) {
+	if m.filterState == Filtered {
 		underlineTextStyle := textStyle.Copy().Underline(true)
 		matchedRunes := m.MatchesForItem(index)
 		label := lipgloss.StyleRunes(i.label(), matchedRunes, underlineTextStyle, textStyle)
@@ -69,11 +70,11 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
 
-func NewResultListItem(itemData, itemFormat, whenSelected string) ResultListItem {
-	parsedResult := shell.ParseCommandResult(itemData, itemFormat)
+func NewResultListItem(itemData string, sourceConfig config.SourceConfig) ResultListItem {
+	parsedResult := shell.ParseCommandResult(itemData, sourceConfig.Format)
 	return ResultListItem{
-		styles: style.DefaultStyles(),
-		resultData: parsedResult,
-		whenSelected: whenSelected,
+		styles:       style.DefaultStyles(),
+		resultData:   parsedResult,
+		sourceConfig: sourceConfig,
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os/exec"
 	"strings"
+
 	pipe "github.com/b4b4r07/go-pipe"
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -11,12 +12,13 @@ import (
 )
 
 type Command struct {
-	cmdStr string
-	params map[string]string
+	cmdStr    string
+	params    map[string]string
+	multiline bool
 }
 
-func NewCommand(str string) *Command {
-	return &Command{cmdStr: str}
+func NewCommand(str string, multiline bool) *Command {
+	return &Command{cmdStr: str, multiline: multiline}
 }
 
 func (c Command) Run() tea.Msg {
@@ -24,7 +26,7 @@ func (c Command) Run() tea.Msg {
 
 	err := pipe.Command(&b, c.execCommands()...)
 
-	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Successful: (err == nil)}
+	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Multiline: c.multiline, Successful: (err == nil)}
 }
 
 func (c *Command) SetParams(params map[string]string) {
@@ -33,10 +35,10 @@ func (c *Command) SetParams(params map[string]string) {
 
 func (c Command) execCommands() []*exec.Cmd {
 	str := SetCommandParameters(c.cmdStr, c.params)
-	pipedCommands := strings.Split(str,"|")
+	pipedCommands := strings.Split(str, "|")
 
 	return lo.Map[string, *exec.Cmd](pipedCommands, func(pipeCommand string, _ int) *exec.Cmd {
-		commandComponents := strings.Split(strings.TrimSpace(pipeCommand)," ")
+		commandComponents := strings.Split(strings.TrimSpace(pipeCommand), " ")
 		mainCommand := commandComponents[0]
 		args := commandComponents[1:]
 
@@ -45,10 +47,12 @@ func (c Command) execCommands() []*exec.Cmd {
 }
 
 type ShellCommandResultMsg struct {
-	CmdStr 		string
-	Output 		string
-	Successful	bool
+	CmdStr     string
+	Output     string
+	Successful bool
+	Multiline  bool
 }
+
 func (s ShellCommandResultMsg) Lines() []string {
 	return strings.Split(s.Output, "\n")
 }

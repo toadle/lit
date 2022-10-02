@@ -1,7 +1,7 @@
 package style
 
 import (
-  "github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // XXX: For now, this is in its own package so that it can be shared between
@@ -9,20 +9,20 @@ import (
 
 // Styles defines styles for the TUI.
 type Styles struct {
-  App						lipgloss.Style
-  List						lipgloss.Style
-  Query						lipgloss.Style
-  QueryPromptFocused		lipgloss.Style
-  ResultListItem			lipgloss.Style
-  PinnedListItem			lipgloss.Style
-  NoResultItem				lipgloss.Style
-  MutedText					lipgloss.Style
-  SelectedMutedText			lipgloss.Style
-  MutedTextUnterlined		lipgloss.Style
-  Text						lipgloss.Style
-  SelectedText				lipgloss.Style
-  SuccessText				lipgloss.Style
-  ErrorText					lipgloss.Style
+	App                 lipgloss.Style
+	List                lipgloss.Style
+	Query               lipgloss.Style
+	QueryPromptFocused  lipgloss.Style
+	ResultListItem      lipgloss.Style
+	PinnedListItem      lipgloss.Style
+	NoResultItem        lipgloss.Style
+	MutedText           lipgloss.Style
+	SelectedMutedText   lipgloss.Style
+	MutedTextUnterlined lipgloss.Style
+	Text                lipgloss.Style
+	SelectedText        lipgloss.Style
+	SuccessText         lipgloss.Style
+	ErrorText           lipgloss.Style
 }
 
 // DefaultStyles returns default styles for the TUI.
@@ -30,39 +30,39 @@ func DefaultStyles() (s Styles) {
 	s.App = lipgloss.NewStyle()
 	s.List = lipgloss.NewStyle()
 	s.PinnedListItem = lipgloss.NewStyle().
-						MarginLeft(2)
+		MarginLeft(2)
 
 	s.ResultListItem = s.PinnedListItem.Copy()
 	s.NoResultItem = s.PinnedListItem.Copy().
-						Foreground(lipgloss.Color("#555555"))
+		Foreground(lipgloss.Color("#555555"))
 
 	s.MutedText = lipgloss.NewStyle().
-					Foreground(lipgloss.Color("#555555"))
+		Foreground(lipgloss.Color("#555555"))
 
 	s.SelectedMutedText = s.MutedText.Copy().
-					Foreground(lipgloss.Color("#FF00FF"))
+		Foreground(lipgloss.Color("#FF00FF"))
 
 	s.MutedTextUnterlined = s.MutedText.Copy().
-					Underline(true)
+		Underline(true)
 
 	s.Text = lipgloss.NewStyle().
-					Foreground(lipgloss.Color("#FFFFFF"))
+		Foreground(lipgloss.Color("#FFFFFF"))
 
 	s.SelectedText = s.Text.Copy().
-					Foreground(lipgloss.Color("#FF00FF")).
-					Bold(true)
+		Foreground(lipgloss.Color("#FF00FF")).
+		Bold(true)
 
 	s.SuccessText = lipgloss.NewStyle().
-					Foreground(lipgloss.Color("#1BEE91"))
+		Foreground(lipgloss.Color("#1BEE91"))
 	s.ErrorText = lipgloss.NewStyle().
-					Foreground(lipgloss.Color("#FF4C94"))
+		Foreground(lipgloss.Color("#FF4C94"))
 
 	s.Query = lipgloss.NewStyle().
-					Margin(1, 0)
+		Margin(1, 0)
 
 	s.QueryPromptFocused = s.Text.Copy().
-					Foreground(lipgloss.Color("#FF00FF")).
-					Bold(true)
+		Foreground(lipgloss.Color("#FF00FF")).
+		Bold(true)
 
-  return s
+	return s
 }
