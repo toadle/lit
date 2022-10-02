@@ -14,7 +14,7 @@ import (
 type FilterState int
 
 const (
-	Unfiltered	FilterState = iota
+	Unfiltered FilterState = iota
 	Filtered
 )
 
@@ -25,33 +25,32 @@ func (f FilterState) String() string {
 	}[f]
 }
 
-
 type Model struct {
-	height				int
-	items				[]Item
-	styles				style.Styles
+	height int
+	items  []Item
+	styles style.Styles
 
-	cursor				int
-	windowBeginIndex	int
-	windowEndIndex		int
+	cursor           int
+	windowBeginIndex int
+	windowEndIndex   int
 
-	filterState			FilterState
-	filterValue			string
-	filteredItems		[]FilteredItem
+	filterState   FilterState
+	filterValue   string
+	filteredItems []FilteredItem
 
-	noResultText		string
+	noResultText string
 }
 
 func New(items []Item, height int) Model {
 	m := Model{
-		cursor: 			-1,
-		styles: 			style.DefaultStyles(),
-		height:				height,
-		windowBeginIndex: 	0,
-		windowEndIndex: 	0,
-		items:				items,
-		filterState:		Unfiltered,
-		noResultText:		"No items found.",
+		cursor:           -1,
+		styles:           style.DefaultStyles(),
+		height:           height,
+		windowBeginIndex: 0,
+		windowEndIndex:   0,
+		items:            items,
+		filterState:      Unfiltered,
+		noResultText:     "No items found.",
 	}
 	return m
 }
@@ -104,7 +103,7 @@ func (m *Model) CursorUp() {
 
 func (m *Model) CursorDown() {
 	if m.cursor > -1 {
-		if m.cursor == m.windowEndIndex - 1 && m.windowEndIndex < len(m.items) - 1 {
+		if m.cursor == m.windowEndIndex-1 && m.windowEndIndex < len(m.items)-1 {
 			m.windowBeginIndex++
 			m.windowEndIndex++
 		}
@@ -160,7 +159,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-	var sections    []string
+	var sections []string
 	sections = append(sections, m.populatedView())
 
 	return lipgloss.JoinVertical(lipgloss.Left, sections...)
@@ -198,9 +197,12 @@ func (m Model) populatedView() string {
 	}
 
 	if len(items) > 0 {
-		for i, item := range items[m.windowBeginIndex:endIndex] {
-			item.Render(&b, m, m.windowBeginIndex + i, item)
-			fmt.Fprint(&b, "\n")
+		windowItems := items[m.windowBeginIndex:endIndex]
+		for i, item := range windowItems {
+			item.Render(&b, m, m.windowBeginIndex+i, item)
+			if i < len(windowItems)-1 {
+				fmt.Fprint(&b, "\n")
+			}
 		}
 	}
 
