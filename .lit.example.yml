@@ -1,20 +1,14 @@
-sources:
-  - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep --invert-match Utilities | grep --invert-match Library | sed s/...kMDItemDisplayName.=./:/"
-    itemFormat: "(?P<data>.+):(?P<label>.+)"
-    whenSelected: "open {data}"
-    pinned: false
-  # - command: "cash {input}"
-  #   itemFormat: "{data}"
-  #   whenSelected: |
-  #     echo "{data}" | pbcopy
-  #   pinned: true
+singleLine:
   - command: trans --brief {input}
-    itemFormat: "{data}"
-    whenSelected: |
+    format: "{data}"
+    action: |
       echo "{data}" | pbcopy
-    pinned: true
     label: trans {input}
-  - command: echo {input} | sed s/,/./g | bc
-    itemFormat: "{data}"
-    whenSelected: echo "{data}" | pbcopy
-    pinned: true
+  - command: qalc {input}
+    format: "{data}"
+    action: echo "{data}" | pbcopy
+
+multiLine:
+  - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep --invert-match Utilities | grep --invert-match Library | sed s/...kMDItemDisplayName.=./:/"
+    format: "(?P<data>.+):(?P<label>.+)"
+    action: "open {data}"
