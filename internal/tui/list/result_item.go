@@ -35,6 +35,14 @@ func (i ResultListItem) data() string {
 	}
 }
 
+func (i ResultListItem) Action() string {
+	return i.sourceConfig.Action
+}
+
+func (i ResultListItem) Params() map[string]string {
+	return i.resultData.Params
+}
+
 func (i ResultListItem) FilterValue() string {
 	return i.label()
 }

@@ -1,8 +1,6 @@
 package tui
 
 import (
-	// "fmt"
-
 	"strings"
 	"time"
 
@@ -18,12 +16,11 @@ import (
 )
 
 type queryChangedMsg int
-
-type CursorFocus int
-
 type FocusChangeMsg struct {
 	newFocus CursorFocus
 }
+
+type CursorFocus int
 
 const (
 	SingleList CursorFocus = iota
@@ -73,7 +70,7 @@ func (b *Bubble) Init() tea.Cmd {
 
 	var pinnedItems []list.Item
 	for _, sourceConfig := range b.config.SingleLineConfigList {
-		pinnedItems = append(pinnedItems, list.NewPinnedListItem(sourceConfig))
+		pinnedItems = append(pinnedItems, list.NewSingleListItem(sourceConfig))
 	}
 	b.singleList.SetItems(pinnedItems)
 
@@ -89,22 +86,31 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyCtrlC:
 			return b, tea.Quit
 		case tea.KeyEnter:
-			// 			i, ok := b.resultList.SelectedItem().(*ResultListItem)
-			// 			if ok {
-			// 				cmdStr := strings.Replace(i.whenSelected, "{data}", i.data, 1)
-			// 				commandComponents := strings.Split(strings.TrimSpace(cmdStr)," ")
-			// 				mainCommand := commandComponents[0]
-			// 				args := commandComponents[1:]
-			//
-			// 				cmd := exec.Command(mainCommand, args...)
-			// 				err := cmd.Run()
-			//
-			// 				if err != nil {
-			// 					fmt.Println(err)
-			// 				} else {
-			// 					os.Exit(0)
-			// 				}
-			// 			}
+			switch b.focus {
+			case SingleList:
+				i, ok := b.singleList.SelectedItem().(list.SingleListItem)
+				if ok {
+					params := map[string]string{
+						"input": b.queryInput.Value(),
+						"data":  i.Output(),
+					}
+					handler := b.generateEntrySelectedHandler(i.Action(), params)
+					teaCmds = append(teaCmds, handler)
+				}
+			case QueryInput:
+				if b.queryInput.CanBeCompleted() {
+					// i := lo.Find[list.ResultListItem](b.multiList, func(listItem list.ResultListItem) bool {
+					// 	return listItem.label == b.queryInput.AvailableCompletion()
+					// })
+				}
+
+			case MultiList:
+				i, ok := b.multiList.SelectedItem().(list.ResultListItem)
+				if ok {
+					handler := b.generateEntrySelectedHandler(i.Action(), i.Params())
+					teaCmds = append(teaCmds, handler)
+				}
+			}
 		case tea.KeyUp:
 			switch b.focus {
 			case QueryInput:
@@ -147,7 +153,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				b.multiList.SetItems(items)
 			} else {
 				newPinnedList := lo.Map[list.Item, list.Item](b.singleList.Items(), func(i list.Item, _ int) list.Item {
-					p := i.(list.PinnedListItem)
+					p := i.(list.SingleListItem)
 					if p.CmdStr() == msg.CmdStr {
 						p.SetOutput(msg.Output)
 						p.SetSuccessful(msg.Successful)
@@ -185,13 +191,23 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return b, tea.Batch(teaCmds...)
 }
 
+func (b *Bubble) generateEntrySelectedHandler(action string, params map[string]string) tea.Cmd {
+	return func() tea.Msg {
+		shellCmd := shell.NewCommand(action, true)
+		shellCmd.SetParams(params)
+		shellCmd.Run()
+
+		return tea.Quit()
+	}
+}
+
 func (b *Bubble) handleQueryChanged() []tea.Cmd {
 	var teaCmds []tea.Cmd
 
 	currentInputValue := b.queryInput.Value()
 
 	newPinnedList := lo.Map[list.Item, list.Item](b.singleList.Items(), func(i list.Item, _ int) list.Item {
-		p := i.(list.PinnedListItem)
+		p := i.(list.SingleListItem)
 		p.SetCurrentValue(currentInputValue)
 		return p
 	})

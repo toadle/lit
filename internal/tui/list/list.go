@@ -88,6 +88,17 @@ func (m *Model) Height() int {
 	return m.height
 }
 
+func (m Model) SelectedItem() Item {
+	i := m.Index()
+
+	items := m.VisibleItems()
+	if i < 0 || len(items) == 0 || len(items) <= i {
+		return nil
+	}
+
+	return items[i]
+}
+
 func (m *Model) CursorUp() {
 	if m.cursor > -1 {
 		if m.cursor != 0 {

@@ -1,9 +1,9 @@
 package list
 
 import (
-	"strings"
 	"fmt"
 	"io"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -13,20 +13,20 @@ import (
 	"lit/internal/tui/style"
 )
 
-type PinnedListItem struct {
-	styles			style.Styles
-	output			string
-	currentInput	string
-	successful		bool
+type SingleListItem struct {
+	styles       style.Styles
+	output       string
+	currentInput string
+	successful   bool
 
-	sourceConfig	config.SourceConfig
+	sourceConfig config.SourceConfig
 }
 
-func (d PinnedListItem) Update(msg tea.Msg, m *Model) tea.Cmd	{
+func (d SingleListItem) Update(msg tea.Msg, m *Model) tea.Cmd {
 	return nil
 }
-func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
-	i, ok := listItem.(PinnedListItem)
+func (d SingleListItem) Render(w io.Writer, m Model, index int, listItem Item) {
+	i, ok := listItem.(SingleListItem)
 	if !ok {
 		return
 	}
@@ -54,7 +54,7 @@ func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		if idx := strings.Index(label, "{input}"); idx > -1 {
 			label = strings.Replace(label, "{input}", currentInput, 1)
 			underlineTextStyle := mutedTextStyle.Copy().Underline(true)
-			label = lipgloss.StyleRunes(label, lo.RangeFrom(idx, idx + lengthOfInput), underlineTextStyle, mutedTextStyle)
+			label = lipgloss.StyleRunes(label, lo.RangeFrom(idx, idx+lengthOfInput), underlineTextStyle, mutedTextStyle)
 		}
 	}
 	sections = append(sections, mutedTextStyle.Render(label))
@@ -65,19 +65,21 @@ func (d PinnedListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
-func (i PinnedListItem) FilterValue() string { return i.sourceConfig.Command }
-func (i PinnedListItem) CmdStr() string { return i.sourceConfig.Command }
-func (i *PinnedListItem) SetCurrentValue(str string) { i.currentInput = str }
-func (i *PinnedListItem) SetOutput(str string) { i.output = str }
-func (i *PinnedListItem) SetSuccessful(b bool) { i.successful = b }
-func (i PinnedListItem) cleanedOutput() string {
+func (i SingleListItem) FilterValue() string         { return i.sourceConfig.Command }
+func (i SingleListItem) CmdStr() string              { return i.sourceConfig.Command }
+func (i SingleListItem) Action() string              { return i.sourceConfig.Action }
+func (i *SingleListItem) SetCurrentValue(str string) { i.currentInput = str }
+func (i *SingleListItem) SetOutput(str string)       { i.output = str }
+func (i *SingleListItem) Output() string             { return i.output }
+func (i *SingleListItem) SetSuccessful(b bool)       { i.successful = b }
+func (i SingleListItem) cleanedOutput() string {
 	return strings.Replace(i.output, "\n", "", -1)
 }
 
-func NewPinnedListItem(sc config.SourceConfig) PinnedListItem {
-	return PinnedListItem{
-		styles: style.DefaultStyles(),
+func NewSingleListItem(sc config.SourceConfig) SingleListItem {
+	return SingleListItem{
+		styles:       style.DefaultStyles(),
 		sourceConfig: sc,
-		successful: false,
+		successful:   false,
 	}
 }
