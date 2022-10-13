@@ -12,3 +12,6 @@ multiLine:
   - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep --invert-match Utilities | grep --invert-match Library | sed s/...kMDItemDisplayName.=./:/"
     format: "(?P<data>.+):(?P<label>.+)"
     action: "open {data}"
+  - command: "mdfind kMDItemContentType == com.apple.addressbook.person -attr kMDItemDisplayName | sed s/...kMDItemDisplayName.=./!/"
+    format: "(?P<data>.+)!(?P<label>.+)"
+    action: "open {data}"

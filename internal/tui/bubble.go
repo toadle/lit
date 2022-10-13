@@ -99,9 +99,18 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			case QueryInput:
 				if b.queryInput.CanBeCompleted() {
-					// i := lo.Find[list.ResultListItem](b.multiList, func(listItem list.ResultListItem) bool {
-					// 	return listItem.label == b.queryInput.AvailableCompletion()
-					// })
+					availableCompletion := b.queryInput.AvailableCompletion()
+					li, found := lo.Find[list.Item](b.multiList.VisibleItems(), func(listItem list.Item) bool {
+						return listItem.FilterValue() == availableCompletion
+					})
+
+					if found {
+						i, ok := li.(list.ResultListItem)
+						if ok {
+							handler := b.generateEntrySelectedHandler(i.Action(), i.Params())
+							teaCmds = append(teaCmds, handler)
+						}
+					}
 				}
 
 			case MultiList:
