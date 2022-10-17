@@ -139,6 +139,16 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				teaCmds = append(teaCmds, b.focusMultiList)
 			}
 		case tea.KeyRunes, tea.KeyBackspace:
+			if b.focus != QueryInput {
+				teaCmds = append(teaCmds, b.focusQueryInput)
+
+				//TODO: Find a better solution - This is a hack
+				var cmd tea.Cmd
+				b.queryInput.Focus()
+				b.queryInput, cmd = b.queryInput.Update(msg)
+				teaCmds = append(teaCmds, cmd)
+				// hack ends here
+			}
 			b.queryInputTag++
 			teaCmds = append(teaCmds, tea.Tick(time.Millisecond*100, func(_ time.Time) tea.Msg {
 				return queryChangedMsg(b.queryInputTag)
@@ -237,9 +247,6 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 	} else {
 		b.multiList.SetFilterValue(currentInputValue)
 		b.multiList.FilterItems()
-		if len(b.multiList.VisibleItems()) > 0 {
-			b.multiList.Select(0)
-		}
 	}
 
 	teaCmds = append(teaCmds, b.generateCompletions)
