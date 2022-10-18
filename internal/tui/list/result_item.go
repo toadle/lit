@@ -15,7 +15,7 @@ import (
 type ResultListItem struct {
 	styles       style.Styles
 	resultData   shell.CommandResult
-	sourceConfig config.SourceConfig
+	sourceConfig config.MultiLineSourceConfig
 }
 
 func (i ResultListItem) label() string {
@@ -78,7 +78,7 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
 
-func NewResultListItem(itemData string, sourceConfig config.SourceConfig) ResultListItem {
+func NewResultListItem(itemData string, sourceConfig config.MultiLineSourceConfig) ResultListItem {
 	parsedResult := shell.ParseCommandResult(itemData, sourceConfig.Format)
 	return ResultListItem{
 		styles:       style.DefaultStyles(),

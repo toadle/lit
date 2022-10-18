@@ -64,7 +64,9 @@ func (b *Bubble) Init() tea.Cmd {
 	var teaCmds []tea.Cmd
 
 	for _, sourceConfig := range b.config.MultiLineConfigList {
-		shellCmd := shell.NewCommand(sourceConfig.Command, true)
+		shellCmd := sourceConfig.GenerateCommand(map[string]string{
+			"input": b.queryInput.Value(),
+		})
 		teaCmds = append(teaCmds, shellCmd.Run)
 	}
 
@@ -162,26 +164,25 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		b.multiList.SetHeight(7)
 		b.singleList.SetHeight(len(b.singleList.Items()))
 	case shell.ShellCommandResultMsg:
-		sourceConfig, ok := b.config.SourceConfigFor(msg.CmdStr, msg.Multiline)
-		if ok {
-			if msg.Multiline {
-				items := b.multiList.Items()
-				for _, line := range msg.Lines() {
-					items = append(items, list.NewResultListItem(line, sourceConfig))
-				}
-				b.multiList.SetItems(items)
-			} else {
-				newPinnedList := lo.Map[list.Item, list.Item](b.singleList.Items(), func(i list.Item, _ int) list.Item {
-					p := i.(list.SingleListItem)
-					if p.CmdStr() == msg.CmdStr {
-						p.SetOutput(msg.Output)
-						p.SetSuccessful(msg.Successful)
-					}
-					return p
-				})
-				b.singleList.SetItems(newPinnedList)
+		sourceConfig, isMultiLine := b.config.MultiLineSourceConfigFor(msg.CmdStr)
+		if isMultiLine {
+			items := b.multiList.Items()
+			for _, line := range msg.Lines() {
+				items = append(items, list.NewResultListItem(line, sourceConfig))
 			}
+			b.multiList.SetItems(items)
+		} else {
+			newPinnedList := lo.Map[list.Item, list.Item](b.singleList.Items(), func(i list.Item, _ int) list.Item {
+				p := i.(list.SingleListItem)
+				if p.CmdStr() == msg.CmdStr {
+					p.SetOutput(msg.Output)
+					p.SetSuccessful(msg.Successful)
+				}
+				return p
+			})
+			b.singleList.SetItems(newPinnedList)
 		}
+
 	case queryChangedMsg:
 		if int(msg) == b.queryInputTag {
 			teaCmds = append(teaCmds, b.handleQueryChanged()...)
@@ -212,7 +213,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (b *Bubble) generateEntrySelectedHandler(action string, params map[string]string) tea.Cmd {
 	return func() tea.Msg {
-		shellCmd := shell.NewCommand(action, true)
+		shellCmd := shell.NewCommand(action)
 		shellCmd.SetParams(params)
 		shellCmd.Run()
 
@@ -225,17 +226,16 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 
 	currentInputValue := b.queryInput.Value()
 
-	newPinnedList := lo.Map[list.Item, list.Item](b.singleList.Items(), func(i list.Item, _ int) list.Item {
+	newPinnedList := lo.Map(b.singleList.Items(), func(i list.Item, _ int) list.Item {
 		p := i.(list.SingleListItem)
 		p.SetCurrentValue(currentInputValue)
 		return p
 	})
 	b.singleList.SetItems(newPinnedList)
 
-	commands := b.generateCommandsFor(b.config.MultiLineConfigList, true)
-	commands = append(commands, b.generateCommandsFor(b.config.SingleLineConfigList, false)...)
+	commands := b.generateCommandsFor(b.config.CommandGenerators())
 
-	commandsAsTeaCmds := lo.Map[shell.Command, tea.Cmd](commands, func(c shell.Command, _ int) tea.Cmd {
+	commandsAsTeaCmds := lo.Map(commands, func(c shell.Command, _ int) tea.Cmd {
 		return c.Run
 	})
 
@@ -253,12 +253,12 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 	return teaCmds
 }
 
-func (b Bubble) generateCommandsFor(configs []config.SourceConfig, multiline bool) []shell.Command {
+func (b Bubble) generateCommandsFor(configs []config.CommandGenerator) []shell.Command {
 	currentInputValue := b.queryInput.Value()
 	shellCommands := []shell.Command{}
-	for _, sourceConfig := range configs {
-		if strings.Contains(sourceConfig.Command, "{input}") {
-			shellCmd := shell.NewCommand(sourceConfig.Command, multiline)
+	for _, cg := range configs {
+		if strings.Contains(cg.Command, "{input}") {
+			shellCmd := shell.NewCommand(cg.Command)
 			shellCmd.SetParams(map[string]string{
 				"input": currentInputValue,
 			})

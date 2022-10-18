@@ -1,17 +1,21 @@
 singleLine:
   - command: trans --brief {input}
-    format: "{data}"
     action: |
       echo "{data}" | pbcopy
-    label: trans {input}
+    label: "trans {input}"
   - command: qalc {input}
-    format: "{data}"
     action: echo "{data}" | pbcopy
 
 multiLine:
   - command: "mdfind kMDItemContentType == com.apple.application-* -attr kMDItemDisplayName | grep --invert-match Utilities | grep --invert-match Library | sed s/...kMDItemDisplayName.=./:/"
     format: "(?P<data>.+):(?P<label>.+)"
     action: "open {data}"
+    labels:
+      title: "\ue713 {label}"
+      description: "{data}"
   - command: "mdfind kMDItemContentType == com.apple.addressbook.person -attr kMDItemDisplayName | sed s/...kMDItemDisplayName.=./!/"
     format: "(?P<data>.+)!(?P<label>.+)"
     action: "open {data}"
+    labels:
+      title: "\uf2c0 {label}"
+      description: "{data}"

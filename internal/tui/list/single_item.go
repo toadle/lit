@@ -19,7 +19,7 @@ type SingleListItem struct {
 	currentInput string
 	successful   bool
 
-	sourceConfig config.SourceConfig
+	sourceConfig config.SingleLineSourceConfig
 }
 
 func (d SingleListItem) Update(msg tea.Msg, m *Model) tea.Cmd {
@@ -76,7 +76,7 @@ func (i SingleListItem) cleanedOutput() string {
 	return strings.Replace(i.output, "\n", "", -1)
 }
 
-func NewSingleListItem(sc config.SourceConfig) SingleListItem {
+func NewSingleListItem(sc config.SingleLineSourceConfig) SingleListItem {
 	return SingleListItem{
 		styles:       style.DefaultStyles(),
 		sourceConfig: sc,

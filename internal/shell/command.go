@@ -12,13 +12,12 @@ import (
 )
 
 type Command struct {
-	cmdStr    string
-	params    map[string]string
-	multiline bool
+	cmdStr string
+	params map[string]string
 }
 
-func NewCommand(str string, multiline bool) *Command {
-	return &Command{cmdStr: str, multiline: multiline}
+func NewCommand(str string) *Command {
+	return &Command{cmdStr: str}
 }
 
 func (c Command) Run() tea.Msg {
@@ -26,7 +25,7 @@ func (c Command) Run() tea.Msg {
 
 	err := pipe.Command(&b, c.execCommands()...)
 
-	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Multiline: c.multiline, Successful: (err == nil)}
+	return ShellCommandResultMsg{Output: b.String(), CmdStr: c.cmdStr, Successful: (err == nil)}
 }
 
 func (c *Command) SetParams(params map[string]string) {
@@ -50,7 +49,6 @@ type ShellCommandResultMsg struct {
 	CmdStr     string
 	Output     string
 	Successful bool
-	Multiline  bool
 }
 
 func (s ShellCommandResultMsg) Lines() []string {
