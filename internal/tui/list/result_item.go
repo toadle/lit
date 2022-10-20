@@ -18,21 +18,24 @@ type ResultListItem struct {
 	sourceConfig config.MultiLineSourceConfig
 }
 
-func (i ResultListItem) label() string {
-	label, exists := i.resultData.Params["label"]
-	if exists {
-		return label
-	} else {
-		return ""
+func (i ResultListItem) title() string {
+	labelFormatStr := "{title}"
+	labelsConfig := i.sourceConfig.Labels
+
+	if len(labelsConfig.Title) > 0 {
+		labelFormatStr = labelsConfig.Title
 	}
+	return shell.SetCommandParameters(labelFormatStr, i.resultData.Params)
 }
-func (i ResultListItem) data() string {
-	data, exists := i.resultData.Params["data"]
-	if exists {
-		return data
-	} else {
-		return ""
+
+func (i ResultListItem) description() string {
+	labelFormatStr := "{description}"
+	labelsConfig := i.sourceConfig.Labels
+
+	if len(labelsConfig.Description) > 0 {
+		labelFormatStr = labelsConfig.Description
 	}
+	return shell.SetCommandParameters(labelFormatStr, i.resultData.Params)
 }
 
 func (i ResultListItem) Action() string {
@@ -44,7 +47,7 @@ func (i ResultListItem) Params() map[string]string {
 }
 
 func (i ResultListItem) FilterValue() string {
-	return i.label()
+	return i.title()
 }
 func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
 func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
@@ -66,14 +69,14 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	if m.filterState == Filtered {
 		underlineTextStyle := textStyle.Copy().Underline(true)
 		matchedRunes := m.MatchesForItem(index)
-		label := lipgloss.StyleRunes(i.label(), matchedRunes, underlineTextStyle, textStyle)
+		label := lipgloss.StyleRunes(i.title(), matchedRunes, underlineTextStyle, textStyle)
 		sections = append(sections, textStyle.Render(label))
 	} else {
-		sections = append(sections, textStyle.Render(i.label()))
+		sections = append(sections, textStyle.Render(i.title()))
 	}
 
 	sections = append(sections, " ")
-	sections = append(sections, mutedTextStyle.Render(i.data()))
+	sections = append(sections, mutedTextStyle.Render(i.description()))
 
 	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }

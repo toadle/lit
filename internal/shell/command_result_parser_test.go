@@ -2,8 +2,9 @@ package shell
 
 import (
 	"testing"
-	"github.com/stretchr/testify/assert"
+
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParserCorrectFormat(t *testing.T) {
@@ -15,14 +16,14 @@ func TestParserCorrectFormat(t *testing.T) {
 
 	assert.Equal(len(parsedResult.Params), 2, "has correct number of result-data")
 
-	dataKeys := lo.Keys[string,string](parsedResult.Params)
-	assert.Equal(lo.Contains[string](dataKeys, "data"), true, "has extracted the 'data' key")
-	assert.Equal(lo.Contains[string](dataKeys, "label"), true, "has extracted the 'label' key")
+	dataKeys := lo.Keys[string, string](parsedResult.Params)
+	assert.Equal(true, lo.Contains[string](dataKeys, "data"), "has extracted the 'data' key")
+	assert.Equal(true, lo.Contains[string](dataKeys, "label"), "has extracted the 'label' key")
 
-	assert.Equal(parsedResult.Params["data"], "/Applications/Keynote.app", "has extracted the correct values")
-	assert.Equal(parsedResult.Params["label"], "Keynote", "has extracted the correct values")
+	assert.Equal("/Applications/Keynote.app", parsedResult.Params["data"], "has extracted the correct values")
+	assert.Equal("Keynote", parsedResult.Params["label"], "has extracted the correct values")
 
-	assert.Equal(parsedResult.Unparsed, "/Applications/Keynote.app:Keynote", "contains the original result")
+	assert.Equal("/Applications/Keynote.app:Keynote", parsedResult.Unparsed, "contains the original result")
 }
 
 func TestParserEmptyFormat(t *testing.T) {
@@ -32,6 +33,6 @@ func TestParserEmptyFormat(t *testing.T) {
 	resultStr := "/Applications/Keynote.app"
 	parsedResult := ParseCommandResult(resultStr, itemFormat)
 
-	assert.Equal(len(parsedResult.Params), 0, "has correct number of result-data")
-	assert.Equal(parsedResult.Unparsed, "/Applications/Keynote.app", "contains the original result")
+	assert.Equal(0, len(parsedResult.Params), "has correct number of result-data")
+	assert.Equal("/Applications/Keynote.app", parsedResult.Unparsed, "contains the original result")
 }
