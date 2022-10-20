@@ -50,12 +50,10 @@ func (d SingleListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	}
 	currentInput := i.currentInput
 	lengthOfInput := len(currentInput)
-	if lengthOfInput > 0 {
-		if idx := strings.Index(label, "{input}"); idx > -1 {
-			label = strings.Replace(label, "{input}", currentInput, 1)
-			underlineTextStyle := mutedTextStyle.Copy().Underline(true)
-			label = lipgloss.StyleRunes(label, lo.RangeFrom(idx, idx+lengthOfInput), underlineTextStyle, mutedTextStyle)
-		}
+	if idx := strings.Index(label, "{input}"); idx > -1 {
+		label = strings.Replace(label, "{input}", currentInput, 1)
+		underlineTextStyle := mutedTextStyle.Copy().Underline(true)
+		label = lipgloss.StyleRunes(label, lo.RangeFrom(idx, idx+lengthOfInput), underlineTextStyle, mutedTextStyle)
 	}
 	sections = append(sections, mutedTextStyle.Render(label))
 	sections = append(sections, " ")

@@ -33,11 +33,14 @@ func (c *Command) SetParams(params map[string]string) {
 }
 
 func (c Command) execCommands() []*exec.Cmd {
-	str := SetCommandParameters(c.cmdStr, c.params)
-	pipedCommands := strings.Split(str, "|")
+	pipedCommands := strings.Split(c.cmdStr, "|")
 
-	return lo.Map[string, *exec.Cmd](pipedCommands, func(pipeCommand string, _ int) *exec.Cmd {
+	return lo.Map(pipedCommands, func(pipeCommand string, _ int) *exec.Cmd {
 		commandComponents := strings.Split(strings.TrimSpace(pipeCommand), " ")
+		commandComponents = lo.Map(commandComponents, func(commandComponent string, _ int) string {
+			return SetCommandParameters(commandComponent, c.params)
+		})
+
 		mainCommand := commandComponents[0]
 		args := commandComponents[1:]
 
