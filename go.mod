@@ -2,7 +2,7 @@ module lit
 
 go 1.18
 
-replace github.com/charmbracelet/bubbles => ../bubbles
+replace github.com/charmbracelet/bubbles => github.com/toadle/bubbles v0.0.0-20221020182950-895e46ea7e9f
 
 require (
 	github.com/b4b4r07/go-pipe v0.0.0-20191010045404-84b446f57366
