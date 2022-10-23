@@ -13,8 +13,8 @@ type Styles struct {
 	List                lipgloss.Style
 	Query               lipgloss.Style
 	QueryPromptFocused  lipgloss.Style
-	ResultListItem      lipgloss.Style
-	PinnedListItem      lipgloss.Style
+	SearchListItem      lipgloss.Style
+	CalculatorListItem  lipgloss.Style
 	NoResultItem        lipgloss.Style
 	MutedText           lipgloss.Style
 	SelectedMutedText   lipgloss.Style
@@ -31,11 +31,11 @@ type Styles struct {
 func DefaultStyles() (s Styles) {
 	s.App = lipgloss.NewStyle()
 	s.List = lipgloss.NewStyle()
-	s.PinnedListItem = lipgloss.NewStyle().
+	s.CalculatorListItem = lipgloss.NewStyle().
 		MarginLeft(2)
 
-	s.ResultListItem = s.PinnedListItem.Copy()
-	s.NoResultItem = s.PinnedListItem.Copy().
+	s.SearchListItem = s.CalculatorListItem.Copy()
+	s.NoResultItem = s.CalculatorListItem.Copy().
 		Foreground(lipgloss.Color("#777"))
 
 	s.MutedText = lipgloss.NewStyle().

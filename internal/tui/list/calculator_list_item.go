@@ -13,20 +13,20 @@ import (
 	"lit/internal/tui/style"
 )
 
-type SingleListItem struct {
+type CalculatorListItem struct {
 	styles       style.Styles
 	output       string
 	currentInput string
 	successful   bool
 
-	sourceConfig config.SingleLineSourceConfig
+	sourceConfig config.CalculatorConfig
 }
 
-func (d SingleListItem) Update(msg tea.Msg, m *Model) tea.Cmd {
+func (d CalculatorListItem) Update(msg tea.Msg, m *Model) tea.Cmd {
 	return nil
 }
-func (d SingleListItem) Render(w io.Writer, m Model, index int, listItem Item) {
-	i, ok := listItem.(SingleListItem)
+func (d CalculatorListItem) Render(w io.Writer, m Model, index int, listItem Item) {
+	i, ok := listItem.(CalculatorListItem)
 	if !ok {
 		return
 	}
@@ -61,21 +61,21 @@ func (d SingleListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 		sections = append(sections, textStyle.Render(i.cleanedOutput()))
 	}
 
-	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
+	fmt.Fprintf(w, i.styles.CalculatorListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
-func (i SingleListItem) FilterValue() string         { return i.sourceConfig.Command }
-func (i SingleListItem) CmdStr() string              { return i.sourceConfig.Command }
-func (i SingleListItem) Action() string              { return i.sourceConfig.Action }
-func (i *SingleListItem) SetCurrentValue(str string) { i.currentInput = str }
-func (i *SingleListItem) SetOutput(str string)       { i.output = str }
-func (i *SingleListItem) Output() string             { return i.output }
-func (i *SingleListItem) SetSuccessful(b bool)       { i.successful = b }
-func (i SingleListItem) cleanedOutput() string {
+func (i CalculatorListItem) FilterValue() string         { return i.sourceConfig.Command }
+func (i CalculatorListItem) CmdStr() string              { return i.sourceConfig.Command }
+func (i CalculatorListItem) Action() string              { return i.sourceConfig.Action }
+func (i *CalculatorListItem) SetCurrentValue(str string) { i.currentInput = str }
+func (i *CalculatorListItem) SetOutput(str string)       { i.output = str }
+func (i *CalculatorListItem) Output() string             { return i.output }
+func (i *CalculatorListItem) SetSuccessful(b bool)       { i.successful = b }
+func (i CalculatorListItem) cleanedOutput() string {
 	return strings.Replace(i.output, "\n", "", -1)
 }
 
-func NewSingleListItem(sc config.SingleLineSourceConfig) SingleListItem {
-	return SingleListItem{
+func NewCalculatorListItem(sc config.CalculatorConfig) CalculatorListItem {
+	return CalculatorListItem{
 		styles:       style.DefaultStyles(),
 		sourceConfig: sc,
 		successful:   false,

@@ -16,12 +16,12 @@ type SourceConfig struct {
 	Action           string `mapstructure:"action"`
 }
 
-type SingleLineSourceConfig struct {
+type CalculatorConfig struct {
 	SourceConfig `mapstructure:",squash"`
 	Label        string `mapstructure:"label"`
 }
 
-type MultiLineSourceConfig struct {
+type SearchConfig struct {
 	SourceConfig `mapstructure:",squash"`
 	Format       string                `mapstructure:"format"`
 	Labels       MultiLineLabelsConfig `mapstructure:"labels"`
@@ -33,28 +33,28 @@ type MultiLineLabelsConfig struct {
 }
 
 type LauncherConfig struct {
-	SingleLineConfigList []SingleLineSourceConfig `mapstructure:"singleLine"`
-	MultiLineConfigList  []MultiLineSourceConfig  `mapstructure:"multiLine"`
+	CalculatorConfigList []CalculatorConfig `mapstructure:"calculators"`
+	SearchConfigList     []SearchConfig     `mapstructure:"searches"`
 }
 
-func (lc LauncherConfig) SingleLineSourceConfigFor(Command string) (SingleLineSourceConfig, bool) {
-	return lo.Find(lc.SingleLineConfigList, func(sc SingleLineSourceConfig) bool {
+func (lc LauncherConfig) CalculatorConfigFor(Command string) (CalculatorConfig, bool) {
+	return lo.Find(lc.CalculatorConfigList, func(sc CalculatorConfig) bool {
 		return Command == sc.Command
 	})
 }
 
-func (lc LauncherConfig) MultiLineSourceConfigFor(Command string) (MultiLineSourceConfig, bool) {
-	return lo.Find(lc.MultiLineConfigList, func(sc MultiLineSourceConfig) bool {
+func (lc LauncherConfig) SearchConfigFor(Command string) (SearchConfig, bool) {
+	return lo.Find(lc.SearchConfigList, func(sc SearchConfig) bool {
 		return Command == sc.Command
 	})
 }
 
 func (lc LauncherConfig) CommandGenerators() []CommandGenerator {
-	commandGenerators := lo.Map(lc.MultiLineConfigList, func(mlc MultiLineSourceConfig, index int) CommandGenerator {
+	commandGenerators := lo.Map(lc.SearchConfigList, func(mlc SearchConfig, index int) CommandGenerator {
 		return mlc.CommandGenerator
 	})
 
-	commandGenerators = append(commandGenerators, lo.Map(lc.SingleLineConfigList, func(slc SingleLineSourceConfig, index int) CommandGenerator {
+	commandGenerators = append(commandGenerators, lo.Map(lc.CalculatorConfigList, func(slc CalculatorConfig, index int) CommandGenerator {
 		return slc.CommandGenerator
 	})...)
 

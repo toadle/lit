@@ -10,7 +10,7 @@ import (
 func TestLabelsWithoutSensibleResultData(t *testing.T) {
 	assert := assert.New(t)
 
-	sourceConfig := config.MultiLineSourceConfig{
+	sourceConfig := config.SearchConfig{
 		Format: "",
 		Labels: config.MultiLineLabelsConfig{
 			Title:       "",
@@ -18,7 +18,7 @@ func TestLabelsWithoutSensibleResultData(t *testing.T) {
 		},
 	}
 
-	resultItem := NewResultListItem("TestData", sourceConfig)
+	resultItem := NewSearchListItem("TestData", sourceConfig)
 
 	assert.Equal("", resultItem.title(), "returns nothing as label")
 }
@@ -26,7 +26,7 @@ func TestLabelsWithoutSensibleResultData(t *testing.T) {
 func TestLabelsWithoutConfigValues(t *testing.T) {
 	assert := assert.New(t)
 
-	sourceConfig := config.MultiLineSourceConfig{
+	sourceConfig := config.SearchConfig{
 		Format: "(?P<description>.+):(?P<title>.+)",
 		Labels: config.MultiLineLabelsConfig{
 			Title:       "",
@@ -34,7 +34,7 @@ func TestLabelsWithoutConfigValues(t *testing.T) {
 		},
 	}
 
-	resultItem := NewResultListItem("TestData:TestLabel", sourceConfig)
+	resultItem := NewSearchListItem("TestData:TestLabel", sourceConfig)
 
 	assert.Equal("TestLabel", resultItem.title(), "returns the corrent label")
 }
@@ -42,7 +42,7 @@ func TestLabelsWithoutConfigValues(t *testing.T) {
 func TestLabelsWithConfigValues(t *testing.T) {
 	assert := assert.New(t)
 
-	sourceConfig := config.MultiLineSourceConfig{
+	sourceConfig := config.SearchConfig{
 		Format: "(?P<data>.+):(?P<label>.+)",
 		Labels: config.MultiLineLabelsConfig{
 			Title:       "This is the {label}",
@@ -50,7 +50,7 @@ func TestLabelsWithConfigValues(t *testing.T) {
 		},
 	}
 
-	resultItem := NewResultListItem("TestData:TestLabel", sourceConfig)
+	resultItem := NewSearchListItem("TestData:TestLabel", sourceConfig)
 
 	assert.Equal("This is the TestLabel", resultItem.title(), "returns the corrent label")
 }

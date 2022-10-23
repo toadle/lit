@@ -13,13 +13,13 @@ import (
 	"lit/internal/util"
 )
 
-type ResultListItem struct {
+type SearchListItem struct {
 	styles       style.Styles
 	resultData   shell.CommandResult
-	sourceConfig config.MultiLineSourceConfig
+	sourceConfig config.SearchConfig
 }
 
-func (i ResultListItem) title() string {
+func (i SearchListItem) title() string {
 	labelFormatStr := "{title}"
 	labelsConfig := i.sourceConfig.Labels
 
@@ -29,7 +29,7 @@ func (i ResultListItem) title() string {
 	return shell.SetCommandParameters(labelFormatStr, i.resultData.Params)
 }
 
-func (i ResultListItem) description() string {
+func (i SearchListItem) description() string {
 	labelFormatStr := "{description}"
 	labelsConfig := i.sourceConfig.Labels
 
@@ -39,20 +39,20 @@ func (i ResultListItem) description() string {
 	return shell.SetCommandParameters(labelFormatStr, i.resultData.Params)
 }
 
-func (i ResultListItem) Action() string {
+func (i SearchListItem) Action() string {
 	return i.sourceConfig.Action
 }
 
-func (i ResultListItem) Params() map[string]string {
+func (i SearchListItem) Params() map[string]string {
 	return i.resultData.Params
 }
 
-func (i ResultListItem) FilterValue() string {
+func (i SearchListItem) FilterValue() string {
 	return util.RemoveSpecialCharacters(i.title())
 }
-func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
-func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
-	i, ok := listItem.(ResultListItem)
+func (d SearchListItem) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
+func (d SearchListItem) Render(w io.Writer, m Model, index int, listItem Item) {
+	i, ok := listItem.(SearchListItem)
 	if !ok {
 		return
 	}
@@ -79,12 +79,12 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 	sections = append(sections, " ")
 	sections = append(sections, mutedTextStyle.Render(i.description()))
 
-	fmt.Fprintf(w, i.styles.PinnedListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
+	fmt.Fprintf(w, i.styles.CalculatorListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
 
-func NewResultListItem(itemData string, sourceConfig config.MultiLineSourceConfig) ResultListItem {
+func NewSearchListItem(itemData string, sourceConfig config.SearchConfig) SearchListItem {
 	parsedResult := shell.ParseCommandResult(itemData, sourceConfig.Format)
-	return ResultListItem{
+	return SearchListItem{
 		styles:       style.DefaultStyles(),
 		resultData:   parsedResult,
 		sourceConfig: sourceConfig,
