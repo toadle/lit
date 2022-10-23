@@ -23,7 +23,7 @@ All the stuff you desired is directly integrated from you sheel via a simple YAM
 
 ## Installation
 
-Download a binary from the [releases][releases] page.
+Download a binary from the [releases](https://github.com/toadle/lit/releases) page.
 
 Or build it yourself (requires Go 1.18+):
 
