@@ -23,6 +23,8 @@ type Styles struct {
 	SelectedText        lipgloss.Style
 	SuccessText         lipgloss.Style
 	ErrorText           lipgloss.Style
+	CalculatorText      lipgloss.Style
+	MutedCalculatorText lipgloss.Style
 }
 
 // DefaultStyles returns default styles for the TUI.
@@ -34,13 +36,13 @@ func DefaultStyles() (s Styles) {
 
 	s.ResultListItem = s.PinnedListItem.Copy()
 	s.NoResultItem = s.PinnedListItem.Copy().
-		Foreground(lipgloss.Color("#555555"))
+		Foreground(lipgloss.Color("#777"))
 
 	s.MutedText = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#555555"))
+		Foreground(lipgloss.Color("#777"))
 
 	s.SelectedMutedText = s.MutedText.Copy().
-		Foreground(lipgloss.Color("#FF00FF"))
+		Foreground(lipgloss.Color("#E5C352"))
 
 	s.MutedTextUnterlined = s.MutedText.Copy().
 		Underline(true)
@@ -49,7 +51,7 @@ func DefaultStyles() (s Styles) {
 		Foreground(lipgloss.Color("#FFFFFF"))
 
 	s.SelectedText = s.Text.Copy().
-		Foreground(lipgloss.Color("#FF00FF")).
+		Foreground(lipgloss.Color("#F5C90C")).
 		Bold(true)
 
 	s.SuccessText = lipgloss.NewStyle().
@@ -61,8 +63,14 @@ func DefaultStyles() (s Styles) {
 		Margin(1, 0)
 
 	s.QueryPromptFocused = s.Text.Copy().
-		Foreground(lipgloss.Color("#FF00FF")).
+		Foreground(lipgloss.Color("#E94904")).
 		Bold(true)
+
+	s.CalculatorText = s.Text.Copy().
+		Foreground(lipgloss.Color("#00BECD"))
+
+	s.MutedCalculatorText = s.Text.Copy().
+		Foreground(lipgloss.Color("#B4E0E7"))
 
 	return s
 }

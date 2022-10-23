@@ -34,8 +34,8 @@ func (d SingleListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 
 	var textStyle, mutedTextStyle lipgloss.Style
 	if index == m.Index() {
-		textStyle = d.styles.SelectedText
-		mutedTextStyle = d.styles.SelectedMutedText
+		textStyle = d.styles.CalculatorText
+		mutedTextStyle = d.styles.MutedCalculatorText
 	} else {
 		textStyle = d.styles.Text
 		mutedTextStyle = d.styles.MutedText
