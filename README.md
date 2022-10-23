@@ -32,21 +32,6 @@ go get
 make install
 ```
 
-Or:
-
-```bash
-brew tap toadle/lit
-brew install lit
-```
-## Uninstall
-
-```bash
-brew uninstall lit
-brew untap toadle/lit
-```
-
-[releases]: https://github.com/mrusme/canard/releases
-
 ## User Manual
 
 Everything `lit` does is based on regular terminal commands. `lit` will re-execute them on every change of your input and you can then navigate up and down to execute actions on the result.
