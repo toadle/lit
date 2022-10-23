@@ -28,6 +28,13 @@ Download a binary from the [releases][releases] page.
 Or build it yourself (requires Go 1.18+):
 
 ```bash
+go get
+make install
+```
+
+Or:
+
+```bash
 brew tap toadle/lit
 brew install lit
 ```
