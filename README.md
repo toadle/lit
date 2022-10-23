@@ -17,9 +17,6 @@ Type away into the fuzzy prompt to
 
 All the stuff you desired is directly integrated from you sheel via a simple YAML-config.
 
-[![Latest Release](https://img.shields.io/github/release/charmbracelet/bubbles.svg)](https://github.com/charmbracelet/bubbles/releases)
-[![Build Status](https://github.com/charmbracelet/bubbles/workflows/build/badge.svg)](https://github.com/charmbracelet/bubbles/actions)
-
 ## Demo
 
 [![asciicast](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE.svg)](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE)
@@ -31,8 +28,14 @@ Download a binary from the [releases][releases] page.
 Or build it yourself (requires Go 1.18+):
 
 ```bash
-go get
-make install
+brew tap toadle/lit
+brew install lit
+```
+## Uninstall
+
+```bash
+brew uninstall lit
+brew untap toadle/lit
 ```
 
 [releases]: https://github.com/mrusme/canard/releases
