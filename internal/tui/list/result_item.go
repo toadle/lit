@@ -10,6 +10,7 @@ import (
 	"lit/internal/config"
 	"lit/internal/shell"
 	"lit/internal/tui/style"
+	"lit/internal/util"
 )
 
 type ResultListItem struct {
@@ -47,7 +48,7 @@ func (i ResultListItem) Params() map[string]string {
 }
 
 func (i ResultListItem) FilterValue() string {
-	return i.title()
+	return util.RemoveSpecialCharacters(i.title())
 }
 func (d ResultListItem) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
 func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
@@ -68,7 +69,7 @@ func (d ResultListItem) Render(w io.Writer, m Model, index int, listItem Item) {
 
 	if m.filterState == Filtered {
 		underlineTextStyle := textStyle.Copy().Underline(true)
-		matchedRunes := m.MatchesForItem(index)
+		matchedRunes := util.FindAllOccurrencesOfCharacters(i.title(), m.filterValue)
 		label := lipgloss.StyleRunes(i.title(), matchedRunes, underlineTextStyle, textStyle)
 		sections = append(sections, textStyle.Render(label))
 	} else {
