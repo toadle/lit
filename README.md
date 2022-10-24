@@ -19,7 +19,7 @@ All the stuff you desired is directly integrated from you sheel via a simple YAM
 
 ## Demo
 
-[![asciicast](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE.svg)](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE)
+![2022-10-24 22 33 07](https://user-images.githubusercontent.com/115103/197623810-d6ee85e5-e301-4254-b41c-11c7e373ad1f.gif)
 
 ## Installation
 
