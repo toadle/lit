@@ -1,4 +1,4 @@
-name: All builds
+name: CI / Testing
 on: [push, pull_request]
 
 jobs:

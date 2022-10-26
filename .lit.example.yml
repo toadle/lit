@@ -1,7 +1,7 @@
 close_on_action: false
 
 calculators:
-  - command: trans --brief {input}
+  - command: echo {input} | xargs trans --brief 
     action: |
       echo "{data}" | pbcopy
     label: "trans {input}"

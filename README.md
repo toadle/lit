@@ -17,25 +17,30 @@ Type away into the fuzzy prompt to
 
 All the stuff you desired is directly integrated from you sheel via a simple YAML-config.
 
-[![Latest Release](https://img.shields.io/github/release/charmbracelet/bubbles.svg)](https://github.com/charmbracelet/bubbles/releases)
-[![Build Status](https://github.com/charmbracelet/bubbles/workflows/build/badge.svg)](https://github.com/charmbracelet/bubbles/actions)
-
 ## Demo
 
-[![asciicast](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE.svg)](https://asciinema.org/a/c6dbWieV2Pn8DgfIbgqZlByPE)
+![2022-10-24 22 45 34](https://user-images.githubusercontent.com/115103/197626118-f06675e0-7385-4afe-af97-f97613d8e7b2.gif)
 
 ## Installation
 
-Download a binary from the [releases][releases] page.
+**macOS**
 
-Or build it yourself (requires Go 1.18+):
+```bash
+brew tap toadle/lit
+brew install lit-cli
+```
+or
+
+**Download** a binary from the [releases](https://github.com/toadle/lit/releases) page.
+
+or 
+
+**Build it yourself** (requires Go 1.18+):
 
 ```bash
 go get
 make install
 ```
-
-[releases]: https://github.com/mrusme/canard/releases
 
 ## User Manual
 
