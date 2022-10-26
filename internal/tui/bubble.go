@@ -15,11 +15,11 @@ import (
 	"lit/internal/tui/style"
 )
 
-type queryChangedMsg int
+type QueryChangedMsg int
 type FocusChangeMsg struct {
 	newFocus CursorFocus
 }
-
+type ResetMsg int
 type CursorFocus int
 
 const (
@@ -153,7 +153,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			b.queryInputTag++
 			teaCmds = append(teaCmds, tea.Tick(time.Millisecond*100, func(_ time.Time) tea.Msg {
-				return queryChangedMsg(b.queryInputTag)
+				return QueryChangedMsg(b.queryInputTag)
 			}))
 		}
 	case tea.WindowSizeMsg:
@@ -183,12 +183,16 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			b.calculatorList.SetItems(newPinnedList)
 		}
 
-	case queryChangedMsg:
+	case QueryChangedMsg:
 		if int(msg) == b.queryInputTag {
 			teaCmds = append(teaCmds, b.handleQueryChanged()...)
 		}
 	case FocusChangeMsg:
 		b.focus = FocusChangeMsg(msg).newFocus
+
+	case ResetMsg:
+		b.queryInput.SetValue("")
+		teaCmds = append(teaCmds, b.focusQueryInput)
 	}
 
 	var cmd tea.Cmd
@@ -217,7 +221,12 @@ func (b *Bubble) generateEntrySelectedHandler(action string, params map[string]s
 		shellCmd.SetParams(params)
 		shellCmd.Run()
 
-		return tea.Quit()
+		if b.config.CloseOnAction {
+			return tea.Quit()
+		} else {
+			return ResetMsg(0)
+		}
+
 	}
 }
 
