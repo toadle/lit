@@ -33,6 +33,7 @@ type MultiLineLabelsConfig struct {
 }
 
 type LauncherConfig struct {
+	CloseOnAction        bool               `mapstructure:"close_on_action"`
 	CalculatorConfigList []CalculatorConfig `mapstructure:"calculators"`
 	SearchConfigList     []SearchConfig     `mapstructure:"searches"`
 }
