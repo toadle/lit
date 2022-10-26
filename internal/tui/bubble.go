@@ -140,6 +140,8 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case QueryInput:
 				teaCmds = append(teaCmds, b.focusSearchList)
 			}
+		case tea.KeyShiftLeft:
+			teaCmds = append(teaCmds, b.resetQueryInput)
 		case tea.KeyRunes, tea.KeyBackspace:
 			if b.focus != QueryInput {
 				teaCmds = append(teaCmds, b.focusQueryInput)
@@ -193,6 +195,7 @@ func (b *Bubble) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ResetMsg:
 		b.queryInput.SetValue("")
 		teaCmds = append(teaCmds, b.focusQueryInput)
+		teaCmds = append(teaCmds, b.handleQueryChanged()...)
 	}
 
 	var cmd tea.Cmd
@@ -328,4 +331,8 @@ func (b *Bubble) focusSearchList() tea.Msg {
 	b.queryInput.PromptStyle = b.styles.Text
 
 	return FocusChangeMsg{newFocus: SearchList}
+}
+
+func (b *Bubble) resetQueryInput() tea.Msg {
+	return ResetMsg(0)
 }
