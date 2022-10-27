@@ -15,10 +15,13 @@ import (
 
 var cliCfg = config.LauncherConfig{}
 
+var Version string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "lit",
-	Short: "A command-line quicklauncher.",
+	Use:     "lit",
+	Version: Version,
+	Short:   "A command-line quicklauncher.",
 	Long: `lit
 An easily configurable quicklauncher for your terminal. 
 You need to create a ~/.lit.yml config file in order to use it. 

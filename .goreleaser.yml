@@ -1,0 +1,218 @@
+# .goreleaser.yaml
+builds:
+  # You can have multiple builds defined as a yaml list
+  -
+    # ID of the build.
+    # Defaults to the binary name.
+    # id: "my-build"
+
+    # Path to main.go file or main package.
+    # Notice: when used with `gomod.proxy`, this must be a package.
+    #
+    # Default is `.`.
+    # main: ./cmd/my-app
+
+    # Binary name.
+    # Can be a path (e.g. `bin/app`) to wrap the binary in a directory.
+    # Default is the name of the project directory.
+    # binary: program
+
+    # Custom flags templates.
+    # Default is empty.
+    # flags:
+    #   - -tags=dev
+    #   - -v
+
+    # Custom asmflags templates.
+    # Default is empty.
+    # asmflags:
+    #   - -D mysymbol
+    #   - all=-trimpath={{.Env.GOPATH}}
+
+    # Custom gcflags templates.
+    # Default is empty.
+    # gcflags:
+    #   - all=-trimpath={{.Env.GOPATH}}
+    #   - ./dontoptimizeme=-N
+
+    # Custom ldflags templates.
+    # Default is `-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=goreleaser`.
+    ldflags:
+      - "-X lit/cmd.Version={{.Version}}"
+
+    # Custom build tags templates.
+    # Default is empty.
+    # tags:
+    #   - osusergo
+    #   - netgo
+    #   - static_build
+    #   - feature
+
+    # Custom environment variables to be set during the builds.
+    #
+    # Default: `os.Environ()` merged with what you set the root `env` section.
+    # env:
+    #   - CGO_ENABLED=0
+
+    # GOOS list to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Defaults are darwin and linux.
+    # goos:
+    #   - freebsd
+    #   - windows
+
+    # GOARCH to build for.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Defaults are 386, amd64 and arm64.
+    # goarch:
+    #   - amd64
+    #   - arm
+    #   - arm64
+
+    # GOARM to build for when GOARCH is arm.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Default is only 6.
+    # goarm:
+    #   - 6
+    #   - 7
+
+    # GOAMD64 to build when GOARCH is amd64.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Default is only v1.
+    # goamd64:
+    #   - v2
+    #   - v3
+
+    # GOMIPS and GOMIPS64 to build when GOARCH is mips, mips64, mipsle or mips64le.
+    # For more info refer to: https://golang.org/doc/install/source#environment
+    # Default is only hardfloat.
+    # gomips:
+    #   - hardfloat
+    #   - softfloat
+
+    # List of combinations of GOOS + GOARCH + GOARM to ignore.
+    # Default is empty.
+    # ignore:
+    #   - goos: darwin
+    #     goarch: 386
+    #   - goos: linux
+    #     goarch: arm
+    #     goarm: 7
+    #   - goarm: mips64
+    #   - gomips: hardfloat
+    #   - goamd64: v4
+
+    # Optionally override the matrix generation and specify only the final list
+    # of targets.
+    #
+    # Format is `{goos}_{goarch}` with their respective suffixes when
+    # applicable: `_{goarm}`, `_{goamd64}`, `_{gomips}`.
+    #
+    # Special values:
+    # - go_118_first_class: evaluates to the first-class ports of go1.18.
+    #   Since GoReleaser v1.9.
+    # - go_first_class: evaluates to latest stable go first-class ports,
+    #   currently same as 1.18.
+    #   Since GoReleaser v1.9.
+    #
+    # This overrides `goos`, `goarch`, `goarm`, `gomips`, `goamd64` and
+    # `ignores`.
+    # targets:
+    #   - go_first_class
+    #   - go_118_first_class
+    #   - linux_amd64_v1
+    #   - darwin_arm64
+    #   - linux_arm_6
+
+    # Set a specific go binary to use when building.
+    # It is safe to ignore this option in most cases.
+    #
+    # Default is "go"
+    # gobinary: "go1.13.4"
+
+    # Sets the command to run to build.
+    # Can be useful if you want to build tests, for example,
+    # in which case you can set this to "test".
+    # It is safe to ignore this option in most cases.
+    #
+    # Default: build.
+    # Since: v1.9.
+    # command: test
+
+    # Set the modified timestamp on the output binary, typically
+    # you would do this to ensure a build was reproducible. Pass
+    # empty string to skip modifying the output.
+    # Default is empty string.
+    # mod_timestamp: '{{ .CommitTimestamp }}'
+
+    # Hooks can be used to customize the final binary,
+    # for example, to run generators.
+    # Those fields allow templates.
+    # Default is both hooks empty.
+    # hooks:
+    #   pre: rice embed-go
+    #   post: ./script.sh {{ .Path }}
+
+    # If true, skip the build.
+    # Useful for library projects.
+    # Default is false
+    # skip: false
+
+    # By default, GoReleaser will create your binaries inside
+    # `dist/${BuildID}_${BuildTarget}`, which is an unique directory per build
+    # target in the matrix.
+    # You can set subdirs within that folder using the `binary` property.
+    #
+    # However, if for some reason you don't want that unique directory to be
+    # created, you can set this property.
+    # If you do, you are responsible for keeping different builds from
+    # overriding each other.
+    #
+    # Defaults to `false`.
+    # no_unique_dist_dir: true
+
+    # By default, GoReleaser will check if the main filepath has a main
+    # function.
+    # This can be used to skip that check, in case you're building tests, for
+    # example.
+    #
+    # Default: false.
+    # Since: v1.9.
+    # no_main_check: true
+
+    # Path to project's (sub)directory containing Go code.
+    # This is the working directory for the Go build command(s).
+    # If dir does not contain a `go.mod` file, and you are using `gomod.proxy`,
+    # produced binaries will be invalid.
+    # You would likely want to use `main` instead of this.
+    # Default is `.`.
+    # dir: go
+
+    # Builder allows you to use a different build implementation.
+    # This is a GoReleaser Pro feature.
+    # Valid options are: `go` and `prebuilt`.
+    # Defaults to `go`.
+    # builder: prebuilt
+
+    # Overrides allows to override some fields for specific targets.
+    # This can be specially useful when using CGO.
+    # Note: it'll only match if the full target matches.
+    #
+    # Default: empty.
+    # Since: v1.5.
+    # overrides:
+    #   - goos: darwin
+    #     goarch: arm64
+    #     goamd64: v1
+    #     goarm: ''
+    #     gomips: ''
+    #     ldflags:
+    #       - foo
+    #     tags:
+    #       - bar
+    #     asmflags:
+    #       - foobar
+    #     gcflags:
+    #       - foobaz
+    #     env:
+    #       - CGO_ENABLED=1
