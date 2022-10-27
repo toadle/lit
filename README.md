@@ -63,6 +63,9 @@ They are displayed below the input of your query. They are supposed to return **
 A basic `.lit.yml` looks like this:
 
 ```yaml
+
+close_on_action: true/false
+
 calculators:
   - command: "..."
     action: "..."
@@ -80,6 +83,9 @@ searches:
 ```
 
 Here is what those values do:
+
+**General Settings**
+`close_on_action` can be set to `true` or `false`. If true then `lit` will exist after you selected an entry. The default setting is `false`. 
 
 **Calculators**
 
