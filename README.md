@@ -19,7 +19,8 @@ All the stuff you desired is directly integrated from you sheel via a simple YAM
 
 ## Demo
 
-![2022-10-24 22 45 34](https://user-images.githubusercontent.com/115103/197626118-f06675e0-7385-4afe-af97-f97613d8e7b2.gif)
+![lit](https://user-images.githubusercontent.com/115103/198582201-ad33c2fd-617c-474b-87ad-d4214b001a76.gif)
+
 
 ## Installation
 
@@ -63,6 +64,9 @@ They are displayed below the input of your query. They are supposed to return **
 A basic `.lit.yml` looks like this:
 
 ```yaml
+
+close_on_action: true/false
+
 calculators:
   - command: "..."
     action: "..."
@@ -80,6 +84,9 @@ searches:
 ```
 
 Here is what those values do:
+
+**General Settings**
+`close_on_action` can be set to `true` or `false`. If true then `lit` will exist after you selected an entry. The default setting is `false`. 
 
 **Calculators**
 
