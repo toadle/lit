@@ -1,8 +1,6 @@
 # lit
 
-<p>
-  <img src="https://res.cloudinary.com/toadle/image/upload/v1666520354/lit_uy82pn.png" width="300" alt="The lit rocket">
-</p>
+<img width="371" alt="Bildschirmfoto 2022-10-28 um 17 32 02" src="https://user-images.githubusercontent.com/115103/198676091-f67c20e5-a252-4c80-8abd-b152d07a6731.png">
 
 _"launch in time"_ - An easily configurable quicklauncher for your terminal. Think of it like Alfred, Launchbar or Raycast for your terminal.
 Use it as a replacement for Spotlight and make it trigger via your Cmd+Space.
