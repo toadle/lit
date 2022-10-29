@@ -1,6 +1,8 @@
 # lit
 
-<img width="371" alt="Bildschirmfoto 2022-10-28 um 17 32 02" src="https://user-images.githubusercontent.com/115103/198676091-f67c20e5-a252-4c80-8abd-b152d07a6731.png">
+
+![lit logo](https://user-images.githubusercontent.com/115103/198839744-aafed46d-c7f7-4a58-9297-25cebe099657.jpg)
+
 
 _"launch in time"_ - An easily configurable quicklauncher for your terminal. Think of it like Alfred, Launchbar or Raycast for your terminal.
 Use it as a replacement for Spotlight and make it trigger via your Cmd+Space.
