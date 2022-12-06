@@ -4,8 +4,9 @@ calculators:
   - command: echo {input} | xargs trans --brief 
     action: |
       echo "{data}" | pbcopy
-    label: "trans {input}"
+    label: "\uf1ab Translate"
   - command: qalc {input}
+    label: "\uf5eb Calculate"
     action: echo "{data}" | pbcopy
 
 searches:

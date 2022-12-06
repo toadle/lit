@@ -9,32 +9,54 @@ import (
 
 // Styles defines styles for the TUI.
 type Styles struct {
-	App                 lipgloss.Style
-	List                lipgloss.Style
-	Query               lipgloss.Style
-	QueryPromptFocused  lipgloss.Style
-	SearchListItem      lipgloss.Style
-	CalculatorListItem  lipgloss.Style
-	NoResultItem        lipgloss.Style
-	MutedText           lipgloss.Style
-	SelectedMutedText   lipgloss.Style
-	MutedTextUnterlined lipgloss.Style
-	Text                lipgloss.Style
-	SelectedText        lipgloss.Style
-	SuccessText         lipgloss.Style
-	ErrorText           lipgloss.Style
-	CalculatorText      lipgloss.Style
-	MutedCalculatorText lipgloss.Style
+	App                        lipgloss.Style
+	List                       lipgloss.Style
+	Query                      lipgloss.Style
+	QueryPromptFocused         lipgloss.Style
+	SearchListItem             lipgloss.Style
+	SearchListItemSelected     lipgloss.Style
+	CalculatorListItem         lipgloss.Style
+	CalculatorListItemSelected lipgloss.Style
+	NoResultItem               lipgloss.Style
+	MutedText                  lipgloss.Style
+	SelectedMutedText          lipgloss.Style
+	MutedTextUnterlined        lipgloss.Style
+	Text                       lipgloss.Style
+	SelectedText               lipgloss.Style
+	SuccessText                lipgloss.Style
+	ErrorText                  lipgloss.Style
+	CalculatorText             lipgloss.Style
+	MutedCalculatorText        lipgloss.Style
 }
 
 // DefaultStyles returns default styles for the TUI.
 func DefaultStyles() (s Styles) {
-	s.App = lipgloss.NewStyle()
+	blue := lipgloss.Color("33")
+	lightBlue := lipgloss.Color("45")
+	yellow := lipgloss.Color("214")
+	lightYellow := lipgloss.Color("221")
+
+	s.App = lipgloss.NewStyle().
+		MarginTop(1).
+		MarginBottom(1)
+
 	s.List = lipgloss.NewStyle()
 	s.CalculatorListItem = lipgloss.NewStyle().
 		MarginLeft(2)
 
+	s.CalculatorListItemSelected = s.CalculatorListItem.Copy().
+		MarginLeft(0).
+		PaddingLeft(1).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(blue).
+		BorderLeft(true).
+		Foreground(blue)
+
 	s.SearchListItem = s.CalculatorListItem.Copy()
+
+	s.SearchListItemSelected = s.CalculatorListItemSelected.Copy().
+		BorderForeground(yellow)
+
 	s.NoResultItem = s.CalculatorListItem.Copy().
 		Foreground(lipgloss.Color("#777"))
 
@@ -42,7 +64,7 @@ func DefaultStyles() (s Styles) {
 		Foreground(lipgloss.Color("#777"))
 
 	s.SelectedMutedText = s.MutedText.Copy().
-		Foreground(lipgloss.Color("#E5C352"))
+		Foreground(lightYellow)
 
 	s.MutedTextUnterlined = s.MutedText.Copy().
 		Underline(true)
@@ -51,7 +73,7 @@ func DefaultStyles() (s Styles) {
 		Foreground(lipgloss.Color("#FFFFFF"))
 
 	s.SelectedText = s.Text.Copy().
-		Foreground(lipgloss.Color("#F5C90C")).
+		Foreground(yellow).
 		Bold(true)
 
 	s.SuccessText = lipgloss.NewStyle().
@@ -67,10 +89,10 @@ func DefaultStyles() (s Styles) {
 		Bold(true)
 
 	s.CalculatorText = s.Text.Copy().
-		Foreground(lipgloss.Color("#00BECD"))
+		Foreground(blue)
 
 	s.MutedCalculatorText = s.Text.Copy().
-		Foreground(lipgloss.Color("#B4E0E7"))
+		Foreground(lightBlue)
 
 	return s
 }

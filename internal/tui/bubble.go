@@ -13,6 +13,7 @@ import (
 	"lit/internal/shell"
 	"lit/internal/tui/list"
 	"lit/internal/tui/style"
+	"lit/internal/tui/text"
 )
 
 type QueryChangedMsg int
@@ -53,7 +54,7 @@ func NewBubble(cliCfg *config.LauncherConfig) *Bubble {
 	}
 
 	b.searchList.SetNoResultText("Nothing found.")
-	b.queryInput.Placeholder = "Your Query"
+	b.queryInput.Placeholder = text.GetRandomQueryPrompt()
 	b.queryInput.ShowCompletions = true
 	b.focusQueryInput()
 
@@ -238,6 +239,10 @@ func (b *Bubble) handleQueryChanged() []tea.Cmd {
 
 	currentInputValue := b.queryInput.Value()
 
+	if len(currentInputValue) == 0 {
+		b.queryInput.Placeholder = text.GetRandomQueryPrompt()
+	}
+
 	newPinnedList := lo.Map(b.calculatorList.Items(), func(i list.Item, _ int) list.Item {
 		p := i.(list.CalculatorListItem)
 		p.SetCurrentValue(currentInputValue)
@@ -303,7 +308,7 @@ func (b *Bubble) View() string {
 	sections = append(sections, queryStyle.Render(b.queryInput.View()))
 	sections = append(sections, b.searchList.View())
 
-	return lipgloss.JoinVertical(lipgloss.Left, sections...)
+	return b.styles.App.Render(lipgloss.JoinVertical(lipgloss.Left, sections...))
 }
 
 func (b *Bubble) focusCalculatorList() tea.Msg {

@@ -32,13 +32,15 @@ func (d CalculatorListItem) Render(w io.Writer, m Model, index int, listItem Ite
 	}
 	var sections []string
 
-	var textStyle, mutedTextStyle lipgloss.Style
+	var textStyle, mutedTextStyle, itemStyle lipgloss.Style
 	if index == m.Index() {
 		textStyle = d.styles.CalculatorText
 		mutedTextStyle = d.styles.MutedCalculatorText
+		itemStyle = d.styles.CalculatorListItemSelected
 	} else {
 		textStyle = d.styles.Text
 		mutedTextStyle = d.styles.MutedText
+		itemStyle = d.styles.CalculatorListItem
 	}
 
 	sourceConfig := i.sourceConfig
@@ -61,7 +63,7 @@ func (d CalculatorListItem) Render(w io.Writer, m Model, index int, listItem Ite
 		sections = append(sections, textStyle.Render(i.cleanedOutput()))
 	}
 
-	fmt.Fprintf(w, i.styles.CalculatorListItem.Render(lipgloss.JoinHorizontal(1, sections...)))
+	fmt.Fprintf(w, itemStyle.Render(lipgloss.JoinHorizontal(1, sections...)))
 }
 func (i CalculatorListItem) FilterValue() string         { return i.sourceConfig.Command }
 func (i CalculatorListItem) CmdStr() string              { return i.sourceConfig.Command }
